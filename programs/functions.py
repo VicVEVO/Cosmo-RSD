@@ -33,33 +33,26 @@ def g(z, omega_0, omega_l0=0.7):
 def D(z, omega_0, omega_l0=0.7):
     return g(z, omega_0, omega_l0) / g(0, omega_0, omega_l0) / (1 + np.asarray(z))
 
-def gamma(omega_m_z):
-    omega_m_z = np.asarray(omega_m_z)
-    return 6/11 - 15/2057 * np.log(omega_m_z)
-
-def make_constant_gamma_func(gamma_value):
-    return lambda omega_m_z: gamma_value
-
 def sigma_8(z, omega_0, sigma_8_0):
     return sigma_8_0 * D(z, omega_0)
 
-def f(gamma_func, z, omega_0):
+def f(gamma, z, omega_0):
     omega_m_z = omega_m(z, omega_0)
-    return omega_m_z ** gamma_func(omega_m_z)
+    return omega_m_z ** gamma
 
-def growth(z, gamma_func = gamma, omega_0 = constants.OMEGA_0, sigma_8_0 = constants.SIGMA_8_0):
+def growth(z, gamma = constants.GAMMA, omega_0 = constants.OMEGA_0, sigma_8_0 = constants.SIGMA_8_0):
     """Returns linear growth rate according to the redshift.
 
     Args:
         z (float): redshift
-        fun_gamma (γ): gamma. Defaults to gamma.
+        gamma (float): γ. Defaults to constants.GAMMA.
         omega_0 (float): Ωm(0). Defaults to constants.OMEGA_0.
         sigma_8_0 (float): σ8(0). Defaults to constants.SIGMA_8_0.
 
     Returns:
         float: fσ8(z)
     """
-    return f(gamma_func, z, omega_0) * sigma_8(z, omega_0, sigma_8_0)
+    return f(gamma, z, omega_0) * sigma_8(z, omega_0, sigma_8_0)
 
 ### Chi2
 
@@ -69,13 +62,19 @@ def calc_chi2_gamma_sigma(sigma_8, gamma_value):
     chi2 = np.sum((growth(constants.z_data.values, gamma_func, sigma_8_0 = sigma_8) - constants.fs8_data)**2 / errors**2)
     return chi2
 
+def calc_chi2(omega0_val, sigma8_val, gamma_val):
+    gamma_func = make_constant_gamma_func(gamma_val)
+    errors = 0.5 * (constants.fs8_err_plus + constants.fs8_err_minus)
+    chi2 = np.sum((growth(constants.z_data.values, gamma_func, omega_0=omega0_val, sigma_8_0 = sigma8_val) - constants.fs8_data)**2 / errors**2)
+    return chi2
+
 def calc_chi2_gamma_omega(omega_0, gamma_value):
     gamma_func = make_constant_gamma_func(gamma_value)
     errors = 0.5 * (constants.fs8_err_plus + constants.fs8_err_minus)
     chi2 = np.sum((growth(constants.z_data.values, gamma_func, omega_0) - constants.fs8_data)**2 / errors**2)
     return chi2
 
-def calc_chi2_sigma_omega_vectorized(omega0, sigma8_0):
+def calc_chi2_sigma_omega_vectorized2(omega0, sigma8_0):
     omega0 = np.asarray(omega0)
     sigma8_0 = np.asarray(sigma8_0)
     errors = 0.5 * (constants.fs8_err_plus + constants.fs8_err_minus)
@@ -84,6 +83,25 @@ def calc_chi2_sigma_omega_vectorized(omega0, sigma8_0):
     residuals = (model - constants.fs8_data) / errors
     chi2 = np.sum(residuals**2)
     return chi2
+
+def calc_chi2_sigma_omega_vectorized(omega0, sigma8_0, n_gamma=600):
+    gamma_vals = np.linspace(0.3, 0.8, n_gamma)
+
+    z_data = constants.z_data.values
+    fs8_data = constants.fs8_data.values
+    errors = 0.5 * (constants.fs8_err_plus + constants.fs8_err_minus)
+
+    z_broadcast = np.array(z_data)[None, :]
+    gamma_broadcast = np.array(gamma_vals)[:, None]
+
+    models = growth(z_broadcast, gamma=gamma_broadcast, omega_0=omega0, sigma_8_0=sigma8_0)
+
+    residuals = (models - np.array(fs8_data)[None, :]) / np.array(errors)[None, :]
+    chi2_vals = np.sum(residuals**2, axis=1)
+
+    return np.max(chi2_vals)
+
+
 
 ### Plotting functions
 
@@ -106,7 +124,7 @@ def display(res, title):
         
     console.print(table)
 
-def display_plot(PDF, x_mean_std, y_mean_std, ax1_label, ax2_label, ax):
+def display_plot(PDF, ax1_label, ax2_label, ax, xlim=None, ylim=None):
     """_summary_
 
     Args:
@@ -122,17 +140,26 @@ def display_plot(PDF, x_mean_std, y_mean_std, ax1_label, ax2_label, ax):
     X, Y = np.meshgrid(x_grid, y_grid, indexing='xy')
     Z = PDF.values
 
-    contour = ax.contourf(X, Y, Z, levels=30, cmap='inferno')
+    contour = ax.contourf(X, Y, Z, levels=100, cmap='inferno')
     plt.colorbar(contour, ax=ax)
 
+    max_idx = np.unravel_index(np.argmax(Z), Z.shape)
+    x_min = X[max_idx]
+    y_min = Y[max_idx]
 
-    x_mean, x_std = x_mean_std
-    y_mean, y_std = y_mean_std
-    ax.plot(x_mean, y_mean, 'ko', label='Best-fit')
-    ax.axhline(y_mean, color='indigo', linestyle='--')
-    ax.axvline(x_mean, color='indigo', linestyle='--')
+    ax.plot(x_min, y_min, 'ko', label='Best-fit')
+    ax.axhline(y_min, color='indigo', linestyle='--')
+    ax.axvline(x_min, color='indigo', linestyle='--')
 
     ax.set_xlabel(ax1_label, fontsize=14)
     ax.set_ylabel(ax2_label, fontsize=14)
     ax.set_title(f"PDF({ax1_label}, {ax2_label})", fontsize=12)
 
+    if xlim is not None:
+        ax.set_xlim(*xlim)
+    if ylim is not None:
+        ax.set_ylim(*ylim)
+
+    ### Display tables of results
+
+    # display([[ax2_label, y_min, "-"], [ax1_label, x_min, "-"]], "Results for (" + ax1_label +", " + ax2_label +") :")

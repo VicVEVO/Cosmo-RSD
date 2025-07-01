@@ -7,6 +7,8 @@ OMEGA_0_SIGMA = .007
 SIGMA_8_0 = 0.811
 SIGMA_8_0_SIGMA = .006
 
+GAMMA = 0.55
+
 data = pd.read_csv("data/fsigma8_data.dat", sep=';', header=0)
 z_data = data['z']
 fs8_data = data['fsig8']
