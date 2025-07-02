@@ -56,6 +56,33 @@ def growth(z, gamma = constants.GAMMA, omega_0 = constants.OMEGA_0, sigma_8_0 = 
 
 ### Chi2
 
+def chi2(omega_vals, sigma_vals, gamma_vals):
+
+    n_omega = len(omega_vals)
+    n_sigma = len(sigma_vals)
+    n_gamma = len(gamma_vals)
+
+    z_data = np.asarray(constants.z_data.values)
+    fs8_data = np.asarray(constants.fs8_data.values)
+    errors = np.asarray(0.5 * (constants.fs8_err_plus + constants.fs8_err_minus))
+
+    chi2_array = np.empty((n_omega, n_sigma, n_gamma))
+
+    for i, omega in enumerate(omega_vals):
+        for j, sigma in enumerate(sigma_vals):
+            z_broadcast = z_data[None, :]
+            gamma_broadcast = gamma_vals[:, None]
+
+            model = growth(z_broadcast, gamma=gamma_broadcast, omega_0=omega, sigma_8_0=sigma)
+
+            residuals = (model - fs8_data[None, :]) / errors[None, :]
+            chi2_vals = np.sum(residuals**2, axis=1)
+
+            chi2_array[i, j, :] = chi2_vals
+
+    return chi2_array
+
+
 def calc_chi2_gamma_sigma(sigma_8, gamma_value):
     gamma_func = make_constant_gamma_func(gamma_value)
     errors = 0.5 * (constants.fs8_err_plus + constants.fs8_err_minus)
@@ -85,7 +112,7 @@ def calc_chi2_sigma_omega_vectorized2(omega0, sigma8_0):
     return chi2
 
 def calc_chi2_sigma_omega_vectorized(omega0, sigma8_0, n_gamma=600):
-    gamma_vals = np.linspace(0.3, 0.8, n_gamma)
+    gamma_vals = np.linspace(0, 1, n_gamma)
 
     z_data = constants.z_data.values
     fs8_data = constants.fs8_data.values
@@ -98,7 +125,6 @@ def calc_chi2_sigma_omega_vectorized(omega0, sigma8_0, n_gamma=600):
 
     residuals = (models - np.array(fs8_data)[None, :]) / np.array(errors)[None, :]
     chi2_vals = np.sum(residuals**2, axis=1)
-
     return np.max(chi2_vals)
 
 
