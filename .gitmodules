@@ -1,0 +1,3 @@
+[submodule "programs/data/DataRelease"]
+	path = programs/data/DataRelease
+	url = https://github.com/PantheonPlusSH0ES/DataRelease.git
