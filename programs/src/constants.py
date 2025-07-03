@@ -9,7 +9,7 @@ SIGMA_8_0_SIGMA = .006
 
 GAMMA = 0.55 # γ
 
-data = pd.read_csv("data/fsigma8_data.dat", sep=';', header=0)
+data = pd.read_csv("../data/fsigma8_data.dat", sep=';', header=0)
 z_data = data['z']
 fs8_data = data['fsig8']
 fs8_err_plus = data['fsig8_err_plus']
