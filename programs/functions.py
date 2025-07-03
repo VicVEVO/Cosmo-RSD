@@ -13,6 +13,7 @@ from rich.console import Console
 from rich.table import Table
 
 from multiprocessing import Pool, cpu_count
+from functools import partial
 
 import fastkde
 
@@ -57,7 +58,17 @@ def growth(z, gamma = constants.GAMMA, omega_0 = constants.OMEGA_0, sigma_8_0 = 
 ### Chi2
 
 def chi2(omega_vals, sigma_vals, gamma_vals):
+    """ Returns chi2 value for all sigma, gamma and omega values.
+    Parallelized function.
 
+    Args:
+        omega_vals (tab): all values of omega
+        sigma_vals (tab): all values of sigma
+        gamma_vals (tab): all values of gamma
+
+    Returns:
+        3D table
+    """
     n_omega = len(omega_vals)
     n_sigma = len(sigma_vals)
     n_gamma = len(gamma_vals)
@@ -68,66 +79,39 @@ def chi2(omega_vals, sigma_vals, gamma_vals):
 
     chi2_array = np.empty((n_omega, n_sigma, n_gamma))
 
-    for i, omega in enumerate(omega_vals):
-        for j, sigma in enumerate(sigma_vals):
-            z_broadcast = z_data[None, :]
-            gamma_broadcast = gamma_vals[:, None]
+    tasks = [(i, j) for i in range(n_omega) for j in range(n_sigma)]
 
-            model = growth(z_broadcast, gamma=gamma_broadcast, omega_0=omega, sigma_8_0=sigma)
+    func = partial(
+        compute_chi2_for_omega_sigma,
+        omega_vals=omega_vals,
+        sigma_vals=sigma_vals,
+        gamma_vals=gamma_vals,
+        z_data=z_data,
+        fs8_data=fs8_data,
+        errors=errors
+    )
 
-            residuals = (model - fs8_data[None, :]) / errors[None, :]
-            chi2_vals = np.sum(residuals**2, axis=1)
+    with Pool(cpu_count()) as pool:
+        results = pool.starmap(func, tasks)
 
-            chi2_array[i, j, :] = chi2_vals
+    for i, j, chi2_vals in results:
+        chi2_array[i, j, :] = chi2_vals
 
     return chi2_array
 
+def compute_chi2_for_omega_sigma(i, j, omega_vals, sigma_vals, gamma_vals, z_data, fs8_data, errors):
+    omega = omega_vals[i]
+    sigma = sigma_vals[j]
 
-def calc_chi2_gamma_sigma(sigma_8, gamma_value):
-    gamma_func = make_constant_gamma_func(gamma_value)
-    errors = 0.5 * (constants.fs8_err_plus + constants.fs8_err_minus)
-    chi2 = np.sum((growth(constants.z_data.values, gamma_func, sigma_8_0 = sigma_8) - constants.fs8_data)**2 / errors**2)
-    return chi2
+    z_broadcast = z_data[None, :]
+    gamma_broadcast = gamma_vals[:, None]
 
-def calc_chi2(omega0_val, sigma8_val, gamma_val):
-    gamma_func = make_constant_gamma_func(gamma_val)
-    errors = 0.5 * (constants.fs8_err_plus + constants.fs8_err_minus)
-    chi2 = np.sum((growth(constants.z_data.values, gamma_func, omega_0=omega0_val, sigma_8_0 = sigma8_val) - constants.fs8_data)**2 / errors**2)
-    return chi2
+    model = growth(z_broadcast, gamma=gamma_broadcast, omega_0=omega, sigma_8_0=sigma)
 
-def calc_chi2_gamma_omega(omega_0, gamma_value):
-    gamma_func = make_constant_gamma_func(gamma_value)
-    errors = 0.5 * (constants.fs8_err_plus + constants.fs8_err_minus)
-    chi2 = np.sum((growth(constants.z_data.values, gamma_func, omega_0) - constants.fs8_data)**2 / errors**2)
-    return chi2
-
-def calc_chi2_sigma_omega_vectorized2(omega0, sigma8_0):
-    omega0 = np.asarray(omega0)
-    sigma8_0 = np.asarray(sigma8_0)
-    errors = 0.5 * (constants.fs8_err_plus + constants.fs8_err_minus)
-    
-    model = growth(constants.z_data.values, omega_0=omega0[..., None], sigma_8_0=sigma8_0[..., None])
-    residuals = (model - constants.fs8_data) / errors
-    chi2 = np.sum(residuals**2)
-    return chi2
-
-def calc_chi2_sigma_omega_vectorized(omega0, sigma8_0, n_gamma=600):
-    gamma_vals = np.linspace(0, 1, n_gamma)
-
-    z_data = constants.z_data.values
-    fs8_data = constants.fs8_data.values
-    errors = 0.5 * (constants.fs8_err_plus + constants.fs8_err_minus)
-
-    z_broadcast = np.array(z_data)[None, :]
-    gamma_broadcast = np.array(gamma_vals)[:, None]
-
-    models = growth(z_broadcast, gamma=gamma_broadcast, omega_0=omega0, sigma_8_0=sigma8_0)
-
-    residuals = (models - np.array(fs8_data)[None, :]) / np.array(errors)[None, :]
+    residuals = (model - fs8_data[None, :]) / errors[None, :]
     chi2_vals = np.sum(residuals**2, axis=1)
-    return np.max(chi2_vals)
 
-
+    return (i, j, chi2_vals)
 
 ### Plotting functions
 
