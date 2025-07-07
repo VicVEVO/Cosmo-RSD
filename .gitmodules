@@ -1,3 +1,6 @@
 [submodule "programs/data/DataRelease"]
 	path = programs/data/DataRelease
 	url = https://github.com/PantheonPlusSH0ES/DataRelease.git
+[submodule "programs/data/spt_act_likelihood"]
+	path = programs/data/spt_act_likelihood
+	url = https://github.com/qujia7/spt_act_likelihood.git

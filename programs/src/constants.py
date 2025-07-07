@@ -15,8 +15,12 @@ data_rsd = pd.read_csv("../data/fsigma8_data.dat", sep=';', header=0)
 data_pantheon = pd.read_csv("../data/DataRelease/Pantheon+_Data/4_DISTANCES_AND_COVAR/Pantheon+SH0ES.dat", sep=' ', header=0)
 cov_mat = pd.read_csv("../data/DataRelease/Pantheon+_Data/4_DISTANCES_AND_COVAR/Pantheon+SH0ES_STAT+SYS.cov")
 
+
 z_data_panth = data_pantheon['zCMB']
+m_b_corr_panth = data_pantheon('m_b_corr')
 mu_data_panth = data_pantheon['MU_SH0ES']
+ceph_dist_panth = data_pantheon('CEPH_DIST')
+is_calibrator_panth = data_pantheon('IS_CALIBRATOR')
 
 
 z_data = data_rsd['z']
