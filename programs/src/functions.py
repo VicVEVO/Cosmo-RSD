@@ -1,25 +1,14 @@
 import numpy as np
 
-import pandas as pd
-
-from matplotlib import pyplot as plt
-from matplotlib.colors import Normalize
-import matplotlib.patches as mpatches
-
-from scipy.stats import gaussian_kde
-
-from numpy.polynomial.chebyshev import Chebyshev
-from rich.console import Console
-from rich.table import Table
+from scipy.integrate import quad
 
 from multiprocessing import Pool, cpu_count
-from functools import partial
 
-import fastkde
+# from functools import partial
 
 import constants
 
-### Theoretical calculation functions
+### RSD theoretical calculation functions
 
 def omega_m(z, omega_0):
     z = np.asarray(z)
@@ -55,121 +44,101 @@ def growth(z, gamma = constants.GAMMA, omega_0 = constants.OMEGA_0, sigma_8_0 = 
     """
     return f(gamma, z, omega_0) * sigma_8(z, omega_0, sigma_8_0)
 
-### Chi2
+### Pantheon+ theoretical calculation functions
 
-def chi2(omega_vals, sigma_vals, gamma_vals):
-    """ Returns chi2 value for all sigma, gamma and omega values.
-    Parallelized function.
+def H_LCDM(z, H0, omega_m):
+    return H0 * np.sqrt(omega_m * (1+z)**3 + (1 - omega_m))
+
+def dL(z, H0, omega_m):
+    c = constants.C
+    integral, _ = quad(lambda zp: 1.0 / H_LCDM(zp, H0, omega_m), 0, z)
+    return (1 + z) * c * integral
+
+def mu(z, omega, H0):
+    return 5 * np.log10(dL(z, H0, omega)) + 25
+
+### Chi2 functions
+
+def chi2_rsd(omega, sigma, gamma):
+    """ Returns chi2 value for a given omega, sigma, gamma.
 
     Args:
-        omega_vals (tab): all values of omega
-        sigma_vals (tab): all values of sigma
-        gamma_vals (tab): all values of gamma
+        omega (float)
+        sigma (float)
+        gamma (float)
 
     Returns:
-        3D table
+        float: chi2
     """
-    n_omega = len(omega_vals)
-    n_sigma = len(sigma_vals)
-    n_gamma = len(gamma_vals)
+    model = growth(constants.z_data, gamma=gamma, omega_0=omega, sigma_8_0=sigma)
 
-    z_data = np.asarray(constants.z_data.values)
-    fs8_data = np.asarray(constants.fs8_data.values)
     errors = np.asarray(0.5 * (constants.fs8_err_plus + constants.fs8_err_minus))
+    residuals = (model - constants.fs8_data.values) / errors
+    return np.sum(residuals**2)
 
-    chi2_array = np.empty((n_omega, n_sigma, n_gamma))
-
-    tasks = [(i, j) for i in range(n_omega) for j in range(n_sigma)]
-
-    func = partial(
-        compute_chi2_for_omega_sigma,
-        omega_vals=omega_vals,
-        sigma_vals=sigma_vals,
-        gamma_vals=gamma_vals,
-        z_data=z_data,
-        fs8_data=fs8_data,
-        errors=errors
-    )
-
-    with Pool(cpu_count()) as pool:
-        results = pool.starmap(func, tasks)
-
-    for i, j, chi2_vals in results:
-        chi2_array[i, j, :] = chi2_vals
-
-    return chi2_array
-
-def compute_chi2_for_omega_sigma(i, j, omega_vals, sigma_vals, gamma_vals, z_data, fs8_data, errors):
-    omega = omega_vals[i]
-    sigma = sigma_vals[j]
-
-    z_broadcast = z_data[None, :]
-    gamma_broadcast = gamma_vals[:, None]
-
-    model = growth(z_broadcast, gamma=gamma_broadcast, omega_0=omega, sigma_8_0=sigma)
-
-    residuals = (model - fs8_data[None, :]) / errors[None, :]
-    chi2_vals = np.sum(residuals**2, axis=1)
-
-    return (i, j, chi2_vals)
-
-### Plotting functions
-
-def display(res, title):
-    """Displays results as a table. 
+def chi2_panth(omega, H0, M):
+    """ Returns chi2 value for a given omega, H0, M.
 
     Args:
-        res (table): [t1, t2, ...] with ti = [name, value, error]
-        title (str): table title
+        omega (float)
+        H0 (float)
+        M (float)
+
+    Returns:
+        float: chi2
     """
-    console = Console()
-    table = Table(title=title)
+    delta_mu = np.empty(constants.n_panth)
 
-    table.add_column("Variable name", justify="center")
-    table.add_column("Value", justify="center")
-    table.add_column("Error", justify="center")
+    for i in range(constants.n_panth):
+        if constants.is_calibrator_panth[i] == 0:
+            delta_mu[i] = mu(constants.z_data_panth[i], omega, H0) - (constants.m_b_corr_panth[i] - M)
+        else:
+            delta_mu[i] = constants.m_b_corr_panth[i] - M - constants.ceph_dist_panth[i]
 
-    for row in res:
-        table.add_row(row[0], f"{row[1]:.3f}", "-" if row[2]=="-" else f"{row[2]:.3f}")
-        
-    console.print(table)
+    return delta_mu @ constants.inv_cov_panth @ delta_mu
 
-def display_plot(PDF, ax1_label, ax2_label, ax, xlim=None, ylim=None):
-    """_summary_
+def chi2_rsd_panth(omega, sigma, gamma, H0, M):
+    return chi2_rsd(omega, sigma, gamma) + chi2_panth(omega, H0, M)
 
-    Args:
-        PDF (_type_): _description_
-        x_mean_std (_type_): _description_
-        y_mean_std (_type_): _description_
-        ax1_label (_type_): _description_
-        ax2_label (_type_): _description_
-        ax (_type_): _description_
-    """
-    x_grid = PDF.coords[PDF.dims[1]].values
-    y_grid = PDF.coords[PDF.dims[0]].values
-    X, Y = np.meshgrid(x_grid, y_grid, indexing='xy')
-    Z = PDF.values
+# def chi2_rsd_3D_version(omega_vals, sigma_vals, gamma_vals):
+#     """ Returns chi2 value for all sigma, gamma and omega values.
+#     Parallelized function.
+#     Unused here.
 
-    contour = ax.contourf(X, Y, Z, levels=100, cmap='inferno')
-    plt.colorbar(contour, ax=ax)
+#     Args:
+#         omega_vals (tab): all values of omega
+#         sigma_vals (tab): all values of sigma
+#         gamma_vals (tab): all values of gamma
 
-    max_idx = np.unravel_index(np.argmax(Z), Z.shape)
-    x_min = X[max_idx]
-    y_min = Y[max_idx]
+#     Returns:
+#         3D table
+#     """
+#     n_omega = len(omega_vals)
+#     n_sigma = len(sigma_vals)
+#     n_gamma = len(gamma_vals)
 
-    ax.plot(x_min, y_min, 'ko', label='Best-fit')
-    ax.axhline(y_min, color='indigo', linestyle='--')
-    ax.axvline(x_min, color='indigo', linestyle='--')
+#     z_data = np.asarray(constants.z_data.values)
+#     fs8_data = np.asarray(constants.fs8_data.values)
+#     errors = np.asarray(0.5 * (constants.fs8_err_plus + constants.fs8_err_minus))
 
-    ax.set_xlabel(ax1_label, fontsize=14)
-    ax.set_ylabel(ax2_label, fontsize=14)
-    ax.set_title(f"PDF({ax1_label}, {ax2_label})", fontsize=12)
+#     chi2_array = np.empty((n_omega, n_sigma, n_gamma))
 
-    if xlim is not None:
-        ax.set_xlim(*xlim)
-    if ylim is not None:
-        ax.set_ylim(*ylim)
+#     tasks = [(i, j) for i in range(n_omega) for j in range(n_sigma)]
 
-    ### Display tables of results
+#     func = partial(
+#         compute_chi2_for_omega_sigma,
+#         omega_vals=omega_vals,
+#         sigma_vals=sigma_vals,
+#         gamma_vals=gamma_vals,
+#         z_data=z_data,
+#         fs8_data=fs8_data,
+#         errors=errors
+#     )
 
-    # display([[ax2_label, y_min, "-"], [ax1_label, x_min, "-"]], "Results for (" + ax1_label +", " + ax2_label +") :")
+#     with Pool(cpu_count()) as pool:
+#         results = pool.starmap(func, tasks)
+
+#     for i, j, chi2_vals in results:
+#         chi2_array[i, j, :] = chi2_vals
+
+#     return chi2_array

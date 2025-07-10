@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 # Planck 2018
 OMEGA_0 = 0.315 # Ωₘ
@@ -20,10 +21,14 @@ fs8_err_plus = data_rsd['fsig8_err_plus']
 fs8_err_minus = data_rsd['fsig8_err_minus']
 fs8_err = [fs8_err_plus, fs8_err_minus]
 
-### Pantheon+ pour contrainte omega_m
-data_pantheon = pd.read_csv("../data/DataRelease/Pantheon+_Data/4_DISTANCES_AND_COVAR/Pantheon+SH0ES.dat", sep=' ', header=0)
-cov_mat = pd.read_csv("../data/DataRelease/Pantheon+_Data/4_DISTANCES_AND_COVAR/Pantheon+SH0ES_STAT+SYS.cov")
+### Pantheon+
+n_panth = 1701
 
+cov_mat = pd.read_csv("../data/DataRelease/Pantheon+_Data/4_DISTANCES_AND_COVAR/Pantheon+SH0ES_STAT+SYS.cov")
+cov_mat = np.array(cov_mat).reshape(n_panth, n_panth)
+inv_cov_panth = np.linalg.inv(cov_mat)
+
+data_pantheon = pd.read_csv("../data/DataRelease/Pantheon+_Data/4_DISTANCES_AND_COVAR/Pantheon+SH0ES.dat", sep=' ', header=0)
 
 z_data_panth = data_pantheon['zCMB']
 m_b_corr_panth = data_pantheon['m_b_corr']
