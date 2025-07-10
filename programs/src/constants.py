@@ -9,7 +9,7 @@ SIGMA_8_0_SIGMA = .006
 
 GAMMA = 0.55 # γ
 
-C = 299792458
+C = 299792.458
 
 ### RSD
 data_rsd = pd.read_csv("../data/fsigma8_data.dat", sep=';', header=0)
