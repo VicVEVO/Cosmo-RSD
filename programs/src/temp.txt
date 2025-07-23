@@ -1,0 +1,161 @@
+H0 = 64  # km/s/Mpc (Planck 2018)
+omega_m = 0.35
+
+Pour sup=800.0, Minimum = 0.007919258804244912 en N=300
+Pour sup=812.5, Minimum = 0.005525358601915188 en N=300
+Pour sup=825.0, Minimum = 0.0031712295567500235 en N=300
+Pour sup=837.5, Minimum = 0.0008553026894919514 en N=300
+Pour sup=850.0, Minimum = 0.0014239074152773818 en N=300
+Pour sup=862.5, Minimum = 0.0036678081131967214 en N=300
+Pour sup=875.0, Minimum = 0.003115520469850582 en N=400
+Pour sup=887.5, Minimum = 0.0011401298040605821 en N=400
+Pour sup=900.0, Minimum = 0.0008027987250352923 en N=400
+Pour sup=912.5, Minimum = 0.0019311463245853383 en N=500
+Pour sup=925.0, Minimum = 0.00015550328169673436 en N=500
+Pour sup=937.5, Minimum = 0.001100288296334529 en N=600
+Pour sup=950.0, Minimum = 0.0005550678429623502 en N=600
+Pour sup=962.5, Minimum = 0.00047034903975707356 en N=700
+Pour sup=975.0, Minimum = 0.00010880948093757161 en N=900
+Pour sup=987.5, Minimum = 3.3093998852784226e-05 en N=1300
+Pour sup=1000.0, Minimum = 2.364641246564971e-05 en N=9900
+Pour sup=1012.5, Minimum = 0.0013934317588826953 en N=9900
+Pour sup=1025.0, Minimum = 0.002737801981131155 en N=9900
+Pour sup=1037.5, Minimum = 0.0040575243053119275 en N=9900
+Pour sup=1050.0, Minimum = 0.005353334041323278 en N=9900
+
+_______________________________________________________________
+
+H0 = 67.66  # km/s/Mpc (Planck 2018)
+omega_m = 0.3111
+
+Pour sup=800.0, Minimum = 0.009191323466966349 en N=300
+Pour sup=812.5, Minimum = 0.00681960210070437 en N=300
+Pour sup=825.0, Minimum = 0.00448769605558509 en N=300
+Pour sup=837.5, Minimum = 0.002194029796372026 en N=300
+Pour sup=850.0, Minimum = 6.288831038392818e-05 en N=300
+Pour sup=862.5, Minimum = 0.002284471519501444 en N=300
+Pour sup=875.0, Minimum = 0.004023631072860063 en N=400
+Pour sup=887.5, Minimum = 0.0020636935630504757 en N=400
+Pour sup=900.0, Minimum = 0.00013629894749878944 en N=400
+Pour sup=912.5, Minimum = 0.0017597360535132128 en N=400
+Pour sup=925.0, Minimum = 0.0008306889056046198 en N=500
+Pour sup=937.5, Minimum = 0.00090391179664396 en N=500
+Pour sup=950.0, Minimum = 4.3956675788275475e-05 en N=600
+Pour sup=962.5, Minimum = 7.483654146173142e-05 en N=700
+Pour sup=975.0, Minimum = 0.00014484768383299823 en N=900
+Pour sup=987.5, Minimum = 9.478112912398463e-05 en N=1300
+Pour sup=1000.0, Minimum = 2.1882970448518757e-05 en N=9900
+Pour sup=1012.5, Minimum = 0.0013934233915422396 en N=9900
+Pour sup=1025.0, Minimum = 0.002739509796077511 en N=9900
+Pour sup=1037.5, Minimum = 0.004060910687350333 en N=9900
+Pour sup=1050.0, Minimum = 0.005358362595131332 en N=9900
+
+_______________________________________________________________
+
+H0 = 65  # km/s/Mpc (Planck 2018)
+omega_m = 0.5
+
+Pour sup=800.0, Minimum = 0.004400788932198032 en N=300
+Pour sup=812.5, Minimum = 0.0019469173171635097 en N=300
+Pour sup=825.0, Minimum = 0.0004672449407098577 en N=300
+Pour sup=837.5, Minimum = 0.002843250862792397 en N=300
+Pour sup=850.0, Minimum = 0.004719241941048366 en N=400
+Pour sup=862.5, Minimum = 0.0026331885675847373 en N=400
+Pour sup=875.0, Minimum = 0.0005819392990459157 en N=400
+Pour sup=887.5, Minimum = 0.0014357967998908424 en N=400
+Pour sup=900.0, Minimum = 0.0019016627685822433 en N=500
+Pour sup=912.5, Minimum = 6.439415302036779e-05 en N=500
+Pour sup=925.0, Minimum = 0.0013851955566354004 en N=600
+Pour sup=937.5, Minimum = 0.0003223645433091373 en N=600
+Pour sup=950.0, Minimum = 1.0802328367858921e-05 en N=700
+Pour sup=962.5, Minimum = 0.00024300650116619232 en N=800
+Pour sup=975.0, Minimum = 0.00014826102460822297 en N=1000
+Pour sup=987.5, Minimum = 4.348980113196094e-05 en N=1500
+Pour sup=1000.0, Minimum = 2.8053111744396025e-05 en N=9900
+Pour sup=1012.5, Minimum = 0.001393418431507596 en N=9900
+Pour sup=1025.0, Minimum = 0.002733467195861599 en N=9900
+Pour sup=1037.5, Minimum = 0.004048963401945485 en N=9900
+Pour sup=1050.0, Minimum = 0.005340639275783531 en N=9900
+
+_______________________________________________________________
+
+H0 = 65  # km/s/Mpc (Planck 2018)
+omega_m = 0.4
+
+Pour sup=800.0, Minimum = 0.006539650151634911 en N=300
+Pour sup=812.5, Minimum = 0.004122000033867825 en N=300
+Pour sup=825.0, Minimum = 0.0017440869576423107 en N=300
+Pour sup=837.5, Minimum = 0.0005956514391606221 en N=300
+Pour sup=850.0, Minimum = 0.0028986943031952014 en N=300
+Pour sup=862.5, Minimum = 0.004151452647722881 en N=400
+Pour sup=875.0, Minimum = 0.0021257671786790422 en N=400
+Pour sup=887.5, Minimum = 0.00013370122306326744 en N=400
+Pour sup=900.0, Minimum = 0.0018259793524332964 en N=400
+Pour sup=912.5, Minimum = 0.0012042685407504569 en N=500
+Pour sup=925.0, Minimum = 0.0005834909391809707 en N=500
+Pour sup=937.5, Minimum = 0.0005478360672654422 en N=600
+Pour sup=950.0, Minimum = 0.0006890502168319649 en N=700
+Pour sup=962.5, Minimum = 0.0003009780355439433 en N=800
+Pour sup=975.0, Minimum = 0.00021945456035132822 en N=1000
+Pour sup=987.5, Minimum = 4.148256946131725e-05 en N=1400
+Pour sup=1000.0, Minimum = 2.5487021655302936e-05 en N=9900
+Pour sup=1012.5, Minimum = 0.0013934680072528287 en N=9900
+Pour sup=1025.0, Minimum = 0.0027360739911826393 en N=9900
+Pour sup=1037.5, Minimum = 0.004054070883721901 en N=9900
+Pour sup=1050.0, Minimum = 0.0053481927380807925 en N=9900
+
+_______________________PRECIS__________________________________
+
+H0 = 65  # km/s/Mpc (Planck 2018)
+omega_m = 0.4
+
+Pour sup=950.0, Minimum = 0.0006890502168319649 en N=700
+Pour sup=952.5, Minimum = 0.0003677614428342769 en N=700
+Pour sup=955.0, Minimum = 4.760692109653297e-05 en N=700
+Pour sup=957.5, Minimum = 0.00027142101160464654 en N=700
+Pour sup=960.0, Minimum = 0.0005893299485135812 en N=700
+Pour sup=962.5, Minimum = 0.0003009780355439433 en N=800
+Pour sup=965.0, Minimum = 9.250964230646814e-06 en N=800
+Pour sup=967.5, Minimum = 0.00031837328346442765 en N=800
+Pour sup=970.0, Minimum = 0.0002156370196910894 en N=900
+Pour sup=972.5, Minimum = 8.74778388561335e-05 en N=900
+Pour sup=975.0, Minimum = 0.00021945456035132822 en N=1000
+Pour sup=977.5, Minimum = 7.872165298507609e-05 en N=1000
+Pour sup=980.0, Minimum = 7.926590635759365e-05 en N=1100
+Pour sup=982.5, Minimum = 0.00013313641833728697 en N=1200
+Pour sup=985.0, Minimum = 0.00011376398440107114 en N=1300
+Pour sup=987.5, Minimum = 4.148256946131725e-05 en N=1400
+Pour sup=990.0, Minimum = 6.988069617424914e-05 en N=1500
+Pour sup=992.5, Minimum = 9.115592426881677e-06 en N=1800
+Pour sup=995.0, Minimum = 1.2681442222979465e-06 en N=2200
+Pour sup=997.5, Minimum = 1.9209355899799882e-06 en N=3100
+Pour sup=1000.0, Minimum = 2.5487021655302936e-05 en N=9900
+
+_______________________________________________________________
+
+H0 = 67  # km/s/Mpc (Planck 2018)
+omega_m = 0.35
+
+Pour sup=950.0, Minimum = 0.0005550678429623502 en N=600
+Pour sup=952.5, Minimum = 0.0007981287285732478 en N=700
+Pour sup=955.0, Minimum = 0.00047932129589457864 en N=700
+Pour sup=957.5, Minimum = 0.0001616442558810548 en N=700
+Pour sup=960.0, Minimum = 0.00015491000719556288 en N=700
+Pour sup=962.5, Minimum = 0.00047034903975707356 en N=700
+Pour sup=965.0, Minimum = 0.0003348376040761876 en N=800
+Pour sup=967.5, Minimum = 2.6738016567421694e-05 en N=800
+Pour sup=970.0, Minimum = 0.00028025862294533895 en N=800
+Pour sup=972.5, Minimum = 0.0001924366212171065 en N=900
+Pour sup=975.0, Minimum = 0.00010880948093757161 en N=900
+Pour sup=977.5, Minimum = 0.00015276599050925507 en N=1000
+Pour sup=980.0, Minimum = 0.0001437397923959772 en N=1000
+Pour sup=982.5, Minimum = 2.0168240760594743e-05 en N=1100
+Pour sup=985.0, Minimum = 7.144185184294592e-06 en N=1200
+Pour sup=987.5, Minimum = 3.3093998852784226e-05 en N=1300
+Pour sup=990.0, Minimum = 3.8178010103120786e-05 en N=1500
+Pour sup=992.5, Minimum = 6.301869323146425e-06 en N=1700
+Pour sup=995.0, Minimum = 3.019706899408521e-06 en N=2100
+Pour sup=997.5, Minimum = 6.398303456170119e-06 en N=3000
+Pour sup=1000.0, Minimum = 2.364641246564971e-05 en N=9900
+
+=>> Garder sup = 985.0 et N = 1300 /OU/ sup = 1000.0 et N > 4000
