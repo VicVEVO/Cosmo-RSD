@@ -4,8 +4,6 @@ from scipy.integrate import quad
 
 from multiprocessing import Pool, cpu_count
 
-# from functools import partial
-
 from numba import njit
 
 import constants

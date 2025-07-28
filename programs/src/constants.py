@@ -13,7 +13,7 @@ GAMMA = 0.55 # γ
 C = 299792.458
 
 ### RSD
-data_rsd = pd.read_csv("../data/fsigma8_data.dat", sep=';', header=0)
+data_rsd = pd.read_csv("../../data/fsigma8_data.dat", sep=';', header=0)
 
 z_data = data_rsd['z']
 fs8_data = data_rsd['fsig8']
@@ -24,11 +24,11 @@ fs8_err = [fs8_err_plus, fs8_err_minus]
 ### Pantheon+
 n_panth = 1701
 
-cov_mat = pd.read_csv("../data/DataRelease/Pantheon+_Data/4_DISTANCES_AND_COVAR/Pantheon+SH0ES_STAT+SYS.cov")
+cov_mat = pd.read_csv("../../data/DataRelease/Pantheon+_Data/4_DISTANCES_AND_COVAR/Pantheon+SH0ES_STAT+SYS.cov")
 cov_mat = np.array(cov_mat).reshape(n_panth, n_panth)
 inv_cov_panth = np.linalg.inv(cov_mat)
 
-data_pantheon = pd.read_csv("../data/DataRelease/Pantheon+_Data/4_DISTANCES_AND_COVAR/Pantheon+SH0ES.dat", sep=' ', header=0)
+data_pantheon = pd.read_csv("../../data/DataRelease/Pantheon+_Data/4_DISTANCES_AND_COVAR/Pantheon+SH0ES.dat", sep=' ', header=0)
 
 z_data_panth = data_pantheon['zCMB']
 m_b_corr_panth = data_pantheon['m_b_corr']
