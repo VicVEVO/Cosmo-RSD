@@ -50,7 +50,7 @@ def growth(z, gamma, omega_0, sigma_8_0):
     """
     return f(gamma, z, omega_0) * sigma_8(z, omega_0, sigma_8_0)
 
-### Pantheon+ theoretical calculation functions
+### SN1A theoretical calculation functions
 
 @njit
 def H_LCDM(z, H0, omega_m):
@@ -85,6 +85,20 @@ def ex_dL(z, H0, omega_m):
 def mu(z, omega, H0, c):
     return 5 * np.log10(dL(z, H0, omega, c)) + 25
 
+### BAO theoretical calculation functions
+
+@njit
+def Dmrd(z, omega_m, rd, H0, c):
+    integral = integral_trapezoid(inv_H_LCDM, 0.0, z, 1000, H0, omega_m)
+    return c * integral / rd
+
+@njit
+def Dmrd_array(z_array, omega_m, rd, H0, c):
+    result = np.empty_like(z_array)
+    for i in range(z_array.size):
+        result[i] = Dmrd(z_array[i], omega_m, rd, H0, c)
+    return result
+
 ### Chi2 functions
 
 @njit
@@ -111,7 +125,7 @@ def chi2_rsd(z_data, fs8_data, fs8_err_plus, fs8_err_minus, omega, sigma, gamma)
 
 @njit
 def chi2_panth(n_panth, z_data_panth, is_calibrator_panth, m_b_corr_panth, ceph_dist_panth, inv_cov_panth, omega, H0, M, c):
-    """ Returns chi2 value for a given omega, H0, M.
+    """ Returns chi2 value for a given omega, H0, M according to Pantheon+ data.
 
     Args:
         omega (float)
@@ -132,5 +146,12 @@ def chi2_panth(n_panth, z_data_panth, is_calibrator_panth, m_b_corr_panth, ceph_
     return delta_mu @ inv_cov_panth @ delta_mu
 
 @njit
+def chi2_bao_dmrd(z_data, dmrd_data, dmrd_err, c, omega, rd, H0):
+    model = Dmrd_array(z_data, omega, rd, H0, c)
+    residuals = (model - dmrd_data) / dmrd_err
+    return np.sum(residuals**2)
+
+@njit
 def chi2_rsd_panth(z_data, fs8_data, fs8_err_plus, fs8_err_minus, n_panth, z_data_panth, is_calibrator_panth, m_b_corr_panth, ceph_dist_panth, inv_cov_panth, omega, sigma, gamma, H0, M, c):
     return chi2_rsd(z_data, fs8_data, fs8_err_plus, fs8_err_minus, omega, sigma, gamma) + chi2_panth(n_panth, z_data_panth, is_calibrator_panth, m_b_corr_panth, ceph_dist_panth, inv_cov_panth, omega, H0, M, c)
+

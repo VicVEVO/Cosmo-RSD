@@ -35,3 +35,10 @@ m_b_corr_panth = data_pantheon['m_b_corr']
 mu_data_panth = data_pantheon['MU_SH0ES']
 ceph_dist_panth = data_pantheon['CEPH_DIST']
 is_calibrator_panth = data_pantheon['IS_CALIBRATOR']
+
+### DESIDR2
+data_bao = pd.read_csv("../../data/DESIDR2/alpha_data.dat", sep=';', header=0)
+
+z_data_bao = data_bao['zeff']
+Dmrd_data = data_bao['DM/rd']
+Dmrd_err = data_bao['DM/rd_err']

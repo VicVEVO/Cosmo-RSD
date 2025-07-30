@@ -1,3 +1,5 @@
+# TODO
+- Utiliser d'autres données de WL: KiDS ou DES: Om augmente => S8 diminue
 # Notes
 
 - $highres$ (resp. lowres) stands for how broad are the values taken for Omega_m, sigma_8 and gamma. We use lowres rendered data to compare the confidence contours with a more distant view. 
