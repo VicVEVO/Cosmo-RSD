@@ -1,99 +1,13 @@
-import numpy as np
-
-from scipy.integrate import quad
-
-from multiprocessing import Pool, cpu_count
-
-from numba import njit
-
+from . import cosmo
 from . import constants
 
-@njit
-def integral_trapezoid(func, a, b, N, H0, omega_m):
-    h = (b - a) / N
-    result = 0.5 * (func(a, H0, omega_m) + func(b, H0, omega_m))
-    for i in range(1, N):
-        result += func(a + i * h, H0, omega_m)
-    result *= h
-    return result
+from numba import njit
+import numpy as np
+from iminuit import Minuit
 
-### RSD theoretical calculation functions
-
-@njit
-def _omega_m(z, omegam_0):
-    z = np.asarray(z)
-    omegam_0 = np.asarray(omegam_0)
-    return omegam_0 * (1 + z)**3 / (omegam_0 * (1 + z)**3 + 1 - omegam_0)
-
-@njit
-def _g(z, omegam_0, omegal_0=0.7):
-    omz = _omega_m(z, omegam_0)
-    olz = 1 - omz
-    return 2.5 * omz / (omz**(4/7) - olz + (1 + omz/2)*(1 + olz/70))
-
-@njit
-def _D(z, omegam_0, omegal_0=0.7):
-    return _g(z, omegam_0, omegal_0) / _g(0, omegam_0, omegal_0) / (1 + np.asarray(z))
-
-@njit
-def _sigma8(z, omegam_0, sigma8_0):
-    return sigma8_0 * _D(z, omegam_0)
-
-@njit
-def _f(z, omegam_0, gamma):
-    omega_m_z = _omega_m(z, omegam_0)
-    return omega_m_z ** gamma
-
-@njit
-def _fs8(z, gamma, omegam_0, sigma8_0):
-    """Returns linear growth rate according to the redshift.
-
-    Args:
-        z (float): redshift
-        gamma (float): γ. Defaults to constants.GAMMA.
-        omegam_0 (float): Ωm(0). Defaults to constants.omegam_0.
-        sigma8_0 (float): σ8(0). Defaults to constants.sigma8_0.
-
-    Returns:
-        float: fσ8(z)
-    """
-    return _f(z, omegam_0, gamma) * _sigma8(z, omegam_0, sigma8_0)
-
-### SN1A theoretical calculation functions
-
-@njit
-def _H_LCDM(z, H0, omega_m):
-    return H0 * np.sqrt(omega_m * (1+z)**3 + (1 - omega_m))
-
-@njit
-def _inv_H_LCDM(z, H0, omega_m):
-    return 1.0 / _H_LCDM(z, H0, omega_m)
-
-@njit
-def _dL(z, H0, omega_m, c):
-    integral = integral_trapezoid(_inv_H_LCDM, 0.0, z, 100, H0, omega_m)
-    return (1 + z) * c * integral
-
-@njit
-def _mu(z, omega_m, H0, c):
-    return 5 * np.log10(_dL(z, H0, omega_m, c)) + 25
-
-### BAO theoretical calculation functions
-
-@njit
-def _Dmrd(z, omega_m, rd, H0, c):
-    integral = integral_trapezoid(_inv_H_LCDM, 0.0, z, 1000, H0, omega_m)
-    return c * integral / rd
-
-@njit
-def _Dmrd_array(z_array, omega_m, rd, H0, c):
-    result = np.empty_like(z_array)
-    for i in range(z_array.size):
-        result[i] = _Dmrd(z_array[i], omega_m, rd, H0, c)
-    return result
-
-### Chi2 functions
-
+# ======================================================================
+# CHI2 CALCULATION FUNCTIONS
+# ======================================================================
 @njit
 def chi2_rsd(z_data, fs8_data, fs8_err_plus, fs8_err_minus, omega_m, sigma_8, gamma):
     """ Returns chi2 value for a given Omega_m, sigma_8, gamma.
@@ -110,7 +24,7 @@ def chi2_rsd(z_data, fs8_data, fs8_err_plus, fs8_err_minus, omega_m, sigma_8, ga
     Returns:
         float: chi2
     """
-    model = _fs8(z_data, gamma=gamma, omegam_0=omega_m, sigma8_0=sigma_8)
+    model = cosmo.fs8(z_data, gamma=gamma, omegam_0=omega_m, sigma8_0=sigma_8)
 
     errors = np.asarray(0.5 * (fs8_err_plus + fs8_err_minus))
     residuals = (model - fs8_data) / errors
@@ -139,7 +53,7 @@ def chi2_panth(n_panth, z_data_panth, is_calibrator_panth, m_b_corr_panth, ceph_
 
     for i in range(n_panth):
         if is_calibrator_panth[i] == 0:
-            delta_mu[i] = _mu(z_data_panth[i], omega_m, H0, c) - (m_b_corr_panth[i] - M)
+            delta_mu[i] = cosmo.mu(z_data_panth[i], omega_m, H0, c) - (m_b_corr_panth[i] - M)
         else:
             delta_mu[i] = m_b_corr_panth[i] - M - ceph_dist_panth[i]
 
@@ -161,6 +75,169 @@ def chi2_bao_dmrd(z_data, dmrd_data, dmrd_err, c, omega_m, rd, H0):
     Returns:
         float: chi2
     """
-    model = _Dmrd_array(z_data, omega_m, rd, H0, c)
+    model = cosmo.Dmrd_array(z_data, omega_m, rd, H0, c)
     residuals = (model - dmrd_data) / dmrd_err
     return np.sum(residuals**2)
+
+def chi2_for_const_gamma(chi2_func, omega_m, sigma_8, params_used):
+    """Returns minimum chi2 value for a given Omega_m, sigma_8 with a free gamma, rd, H0, M.
+
+    Args:
+        chi2_func (fun)
+        omega_m (float)
+        sigma_8 (float)
+        params_used (list): 
+            - [L_1, .., L_6]
+            with L_i = [str, bool, (float, float)]
+                - [parameter name, is it fixed ?, its range if it is free] 
+
+    Returns:
+        float: the minimum chi2 value
+    """
+    initial_params = {"omega_m":omega_m, "sigma_8":sigma_8, "gamma":constants.GAMMA, "rd":constants.RD, "H0":constants.H0, "M":constants.M}
+    minimizer = get_minimizer(chi2_func, params_used, initial_params)
+    minimizer.migrad()
+    return minimizer.fval
+
+def chi2_for_const_sigma_8(chi2_func, omega_m, gamma, params_used):
+    """Returns minimum chi2 value for a given Omega_m, gamma with a free sigma_8, rd, H0, M.
+
+    Args:
+        chi2_func (fun)
+        omega_m (float)
+        gamma (float)
+        params_used (list): 
+            - [L_1, .., L_6]
+            with L_i = [str, bool, (float, float)]
+                - [parameter name, is it fixed ?, its range if it is free] 
+
+    Returns:
+        float: the minimum chi2 value
+    """
+    initial_params = {"omega_m":omega_m, "sigma_8":constants.SIGMA_8_0, "gamma":gamma, "rd":constants.RD, "H0":constants.H0, "M":constants.M}
+    minimizer = get_minimizer(chi2_func, params_used, initial_params)
+    minimizer.migrad()
+    return minimizer.fval
+
+def chi2_for_const_omega_m(chi2_func, sigma_8, gamma, params_used):
+    """Returns minimum chi2 value for a given sigma_8, gamma with a free Omega_m, rd, H0, M.
+
+    Args:
+        chi2_func (fun)
+        sigma_8 (float)
+        gamma (float)
+        params_used (list): 
+            - [L_1, .., L_6]
+            with L_i = [str, bool, (float, float)]
+                - [parameter name, is it fixed ?, its range if it is free] 
+
+    Returns:
+        float: the minimum chi2 value
+    """
+    initial_params = {"omega_m":constants.OMEGAM_0, "sigma_8":sigma_8, "gamma":gamma, "rd":constants.RD, "H0":constants.H0, "M":constants.M}
+    minimizer = get_minimizer(chi2_func, params_used, initial_params)
+    minimizer.migrad()
+    return minimizer.fval
+
+# ======================================================================
+# TOOLS FOR CHI2 GRIDS
+# ======================================================================
+
+def plot_chi2_contours(chi2_grid, x_vals, y_vals, labels, title=r"$\chi^2$ Confidence contours", display_best_chi2=True, xlim=None, ylim=None, ax=None):
+     """Plot chi2 confidence contours according to its given grid.
+
+     Parameters:
+         chi2_grid (array): 2D numpy arraylike
+         x_vals (array): 1D numpy arraylike
+         y_vals (array): 1D numpy arraylike
+         labels ([str, str]): The labels ["x_label", "y_label"]
+         title (regexp, optional). Defaults to "chi2 Confidence contours".
+         display_best_chi2 (bool, optional): Display the coordinates of the minimum chi2. Defaults to True.
+         xlim ([int, int], optional): The limits in between x must be in order to zoom in/out. Defaults to None.
+         ylim ([int, int], optional): The limits in between y must be in order to zoom in/out. Defaults to None.
+         ax (axis, optional): Equals to ax[i] with i the subplot index. Defaults to None when used with a single plot.
+     """
+     if ax is None:
+          fig, ax = plt.subplots(figsize=(8, 6))
+
+     chi2_grid -= np.min(chi2_grid)
+
+     levels = [2.3, 6.17, 11.8]
+     colors = ['khaki', 'lightsalmon', 'mediumpurple']
+
+     chi2_clipped = np.clip(chi2_grid, a_min=None, a_max=levels[2])
+
+     cf = ax.contourf(x_vals, y_vals, chi2_clipped, levels=100, cmap='inferno_r')
+
+     for level, color in zip(levels, colors):
+          ax.contour(x_vals, y_vals, chi2_grid, levels=[level], colors=[color], linewidths=2)
+
+     if display_best_chi2:
+          min_idx = np.unravel_index(np.nanargmin(chi2_grid), chi2_grid.shape)
+          best_omega = x_vals[min_idx[1]]
+          best_sigma = y_vals[min_idx[0]]
+          ax.plot(best_omega, best_sigma, 'ko', label='Best-fit')
+          ax.axhline(best_sigma, color='indigo', linestyle='--', alpha=0.6)
+          ax.axvline(best_omega, color='indigo', linestyle='--', alpha=0.6)
+
+     legend_handles = [
+          Patch(color='khaki', label=r'$1\sigma$'),
+          Patch(color='lightsalmon', label=r'$2\sigma$'),
+          Patch(color='mediumpurple', label=r'$3\sigma$')
+     ]
+     ax.legend(handles=legend_handles, loc='upper right')
+
+     ax.set_xlim(xlim)
+     ax.set_ylim(ylim)
+
+     ax.set_xlabel(labels[0])
+     ax.set_ylabel(labels[1])
+     ax.set_title(title)
+     ax.set_facecolor('black')
+
+     plt.tight_layout()
+
+# ======================================================================
+# TOOLS FOR MINIMIZING WITH MINUIT
+# ======================================================================
+
+def display_minimizer(minimizer, epsilon=3):
+     """Display estimated parameters for a Minuit minimizer.
+
+     Parameters:
+          minimizer (Minuit)
+          epsilon (int, optional): Parameter precision. Defaults to 3.
+     """
+     assert isinstance(minimizer, Minuit), ValueError(
+          f"Expected a Minuit object, got {type(minimizer).__name__}")
+     
+     print(f"Fit results (Chi2 = {minimizer.fval:.{epsilon}f}):")
+     for param in minimizer.parameters:
+          print(f"{param} = {minimizer.values[param]:.{epsilon}f} ± {minimizer.errors[param]:.{epsilon}f}")
+
+
+def get_minimizer(chi2_func, params_used, initial_params):
+    """Minimize chi2_func with iminuit depending on which parameters are fixed.
+
+    Parameters:
+        chi2_func (fun): _description_
+        params_used: [x1_used, x2_used, ...]
+            x_used (array): ["x", bool, (x_min, x_max)].
+                If bool==True then x is fixed.
+                Otherwise it is free, between x_min and x_max
+        initial_params: {"x": float} where the float corresponds to the initial
+            value of x for the minimization.
+
+    Returns:
+        Minuit minimizer
+    """
+    assert len(params_used)==6, ValueError(
+          f"Expected 6 parameters, got {len(params_used)}.")
+    
+    minimizer = Minuit(chi2_func, omega_m=initial_params["omega_m"], sigma_8=initial_params["sigma_8"], gamma=initial_params["gamma"], rd=initial_params["rd"], H0=initial_params["H0"], M=initial_params["M"])
+    for param_used in params_used:
+        if param_used[1]:
+            minimizer.fixed[param_used[0]] = True
+        else:
+            minimizer.limits[param_used[0]] = param_used[2]
+    return minimizer
