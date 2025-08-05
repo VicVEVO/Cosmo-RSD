@@ -51,6 +51,9 @@ class GridConfig:
         self.gamma_vals = np.asarray(np.linspace(self.gamma_min, self.gamma_max, self.n_gamma))
         self.rd_vals = np.asarray(np.linspace(self.rd_min, self.rd_max, self.n_rd))
         self.H0_vals = np.asarray(np.linspace(self.H0_min, self.H0_max, self.n_H0))
+
+        self.delta_omega_m = self.omega_m_vals[1] - self.omega_m_vals[0]
+        self.delta_sigma_8 = self.sigma_8_vals[1] - self.sigma_8_vals[0]
             
     def __str__(self):
         return f"<GridConfig N={self.N}, highres={self.is_highres}, folder='{self.FOLDER}'>"
@@ -106,10 +109,7 @@ class GridConfig:
         """Plot chi2 confidence contours according to its given grid.
 
         Parameters:
-            chi2_grid (array): 2D numpy arraylike
-            x_vals (array): 1D numpy arraylike
-            y_vals (array): 1D numpy arraylike
-            labels ([str, str]): The labels ["x_label", "y_label"]
+            id_grid (int): the grid number
             title (regexp, optional). Defaults to "chi2 Confidence contours".
             display_best_chi2 (bool, optional): Display the coordinates of the minimum chi2. Defaults to True.
             xlim ([int, int], optional): The limits in between x must be in order to zoom in/out. Defaults to None.

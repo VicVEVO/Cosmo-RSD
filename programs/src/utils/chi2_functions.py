@@ -1,5 +1,6 @@
 from . import cosmo
 from . import constants
+from . import tools
 
 from numba import njit
 import numpy as np
@@ -78,6 +79,22 @@ def chi2_bao_dmrd(z_data, dmrd_data, dmrd_err, c, omega_m, rd, H0):
     model = cosmo.Dmrd_array(z_data, omega_m, rd, H0, c)
     residuals = (model - dmrd_data) / dmrd_err
     return np.sum(residuals**2)
+
+@njit
+def compute_chi2(use_rsd, use_bao, use_panth, use_desy3, omega_m_array, delta_omega_m, sigma_8_array, delta_sigma_8, z_data_rsd, z_data_panth, z_data_bao, fs8_data, fs8_err_plus, fs8_err_minus, dmrd_data, dmrd_err, n_panth, is_calibrator_panth, m_b_corr_panth, ceph_dist_panth, inv_cov_panth, c, chi2_desy3_grid, omega_m, sigma_8, gamma, rd, H0, M):
+    chi2_val = 0.0
+    if use_rsd:
+        chi2_val += chi2_rsd(z_data_rsd, fs8_data, fs8_err_plus, fs8_err_minus, omega_m, sigma_8, gamma)
+    if use_panth:
+        chi2_val += chi2_panth(n_panth, z_data_panth, is_calibrator_panth, m_b_corr_panth, ceph_dist_panth, inv_cov_panth, omega_m, H0, M, c)
+    if use_bao:
+        chi2_val += chi2_bao_dmrd(z_data_bao, dmrd_data, dmrd_err, c, omega_m, rd, H0)
+    if use_desy3:
+        i_omega = tools.find_index(omega_m, omega_m_array, delta_omega_m)
+        i_sigma = tools.find_index(sigma_8, sigma_8_array, delta_sigma_8)
+        chi2_val += chi2_desy3_grid[i_omega, i_sigma]
+    return chi2_val
+
 
 def chi2_for_const_gamma(chi2_func, omega_m, sigma_8, params_used):
     """Returns minimum chi2 value for a given Omega_m, sigma_8 with a free gamma, rd, H0, M.

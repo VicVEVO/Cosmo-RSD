@@ -42,8 +42,8 @@ is_calibrator_panth = np.asarray(data_pantheon['IS_CALIBRATOR'])
 data_bao = pd.read_csv(data_root / "DESIDR2/alpha_data.dat", sep=';', header=0)
 
 z_data_bao = np.asarray(data_bao['zeff'])
-Dmrd_data = np.asarray(data_bao['DM/rd'])
-Dmrd_err = np.asarray(data_bao['DM/rd_err'])
+dmrd_data = np.asarray(data_bao['DM/rd'])
+dmrd_err = np.asarray(data_bao['DM/rd_err'])
 
 # ======================================================================
 # DESY3 arico DATA
