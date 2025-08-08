@@ -53,7 +53,7 @@ class Chi2Calculator:
 
     def __call__(self, id_grid:int):
         assert id_grid>0 and id_grid<4, ValueError(
-            f"Expected grid id between 1 and 3, got id={id}.")
+            f"Expected grid id between 1 and 3, got id={id_grid}.")
         
         if id_grid == 1:
             params_used = self.get_params_used([True, True, False, is_M_free_minim, is_H0_free_minim, is_rd_free_minim])
