@@ -1,11 +1,11 @@
 from numba import njit
 
 @njit
-def integral_trapezoid(func, a, b, N, H0, omega_m):
+def integral_trapezoid(func, a, b, N, **kwargs):
     h = (b - a) / N
-    result = 0.5 * (func(a, H0, omega_m) + func(b, H0, omega_m))
+    result = 0.5 * (func(a, **kwargs) + func(b, **kwargs))
     for i in range(1, N):
-        result += func(a + i * h, H0, omega_m)
+        result += func(a + i * h, **kwargs)
     result *= h
     return result
 

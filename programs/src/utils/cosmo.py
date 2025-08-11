@@ -62,7 +62,7 @@ def _inv_H_LCDM(z, H0, omega_m):
 
 @njit
 def _dL(z, H0, omega_m, c):
-    integral = integral_trapezoid(_inv_H_LCDM, 0.0, z, 100, H0, omega_m)
+    integral = integral_trapezoid(_inv_H_LCDM, 0.0, z, 100, H0=H0, omega_m=omega_m)
     return (1 + z) * c * integral
 
 @njit
@@ -73,7 +73,7 @@ def mu(z, omega_m, H0, c):
 
 @njit
 def _Dmrd(z, omega_m, rd, H0, c):
-    integral = integral_trapezoid(_inv_H_LCDM, 0.0, z, 100, H0, omega_m)
+    integral = integral_trapezoid(_inv_H_LCDM, 0.0, z, 100, H0=H0, omega_m=omega_m)
     return c * integral / rd
 
 @njit
