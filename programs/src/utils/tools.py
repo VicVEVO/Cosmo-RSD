@@ -1,6 +1,5 @@
 from numba import njit
 
-@njit
 def integral_trapezoid(func, a, b, N, **kwargs):
     h = (b - a) / N
     result = 0.5 * (func(a, **kwargs) + func(b, **kwargs))
