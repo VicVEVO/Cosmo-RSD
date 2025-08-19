@@ -1,6 +1,6 @@
 from .constants import *
 from .data_loader import *
-from . import cosmo, chi2_functions
+from . import cosmo, chi2_functions, polynoms
 
 import numpy as np
 from joblib import Parallel, delayed
