@@ -34,6 +34,7 @@ The **ΛCDM** model (**Lambda Cold Dark Matter**) is the standard cosmological m
 
 Using the **ΛCDM** model and observations of the early universe, such as the **CMB**, gives one value, while direct measurements based on nearby objects like supernovae and Cepheid stars give a higher value.
 <br clear="left"/>
+
 Late Universe Observation: $H_0 = 73.4 \pm 1.0$ km/Mpc/s.
 
 Early Universe Observation: $H_0 = 67.4 \pm 0.5$ km/Mpc/s.
