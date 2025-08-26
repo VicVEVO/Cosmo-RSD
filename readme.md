@@ -159,7 +159,7 @@ The module `cosmo.py` implements core cosmological quantities required for the �
 Below are the main observables and their definitions:
 
 <details>
-  <summary><strong> 1. RSD : Growth rate observable fσ₈(z)</strong></summary>
+  <summary><strong> 1. RSD observable: Growth rate observable fσ₈(z)</strong></summary>
   
   The product of the linear growth rate $f(z)$ and the amplitude of matter fluctuations $\sigma_8(z)$:
 
@@ -177,7 +177,7 @@ Below are the main observables and their definitions:
 </details>
 
 <details>
-  <summary><strong> 2. SN1a: Distance modulus μ(z)</strong></summary>
+  <summary><strong> 2. SN1a observable: Distance modulus μ(z)</strong></summary>
 
   The distance modulus used in supernova cosmology is defined as:
 
@@ -188,7 +188,7 @@ Below are the main observables and their definitions:
   where $d_L(z)$ is the **luminosity distance**:
   
   <div align="center">
-    $d_L(z) = (1+z) \cdot D_M(z)
+    $d_L(z) = (1+z) \cdot D_M(z)$
   </div>
   
   with $D_M(z)$ the transverse comoving distance.
@@ -241,7 +241,7 @@ Below are the main observables and their definitions:
   measured between redshift bins $i$ and $j$. They are defined as:
   
   <div align="center">
-    $\xi_\pm^{i,j}(\theta) = \sum_{\ell=2}^{\infty} \frac{2\ell+1}{2\pi \ell^2 (\ell+1)^2} \cdot (G^{+}_{\ell,2}(\cos \theta) \pm G^{-}(\cos \theta)) \cdot (C_EE^{i,j}(\ell) \pm C_BB^{i,j}(\ell))$
+    $\xi_\pm^{i,j}(\theta) = \sum_{\ell=2}^{\infty} \frac{2\ell+1}{2\pi \ell^2 (\ell+1)^2} \cdot (G^{+}_{\ell,2}(\cos \theta) \pm G^{-}_{\ell,2}(\cos \theta)) \cdot (C_{EE}^{i,j}(\ell) \pm C_{BB}^{i,j}(\ell))$
   </div>
   
   where:
