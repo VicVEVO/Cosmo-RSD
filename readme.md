@@ -6,7 +6,7 @@
 
 # About this project
 ## Introduction
-On sub-horizon scales, in the linear regime, and assuming that dark energy does not cluster, the evolution equation for the growth function is given by
+On sub-horizon scales, in the linear regime, and assuming that dark energy does not cluster, the evolution equation for the growth function is given by:
 
 $$
 \frac{d f(a)}{d \ln a} + f^2 + \left( 2 + \frac{1}{2} \frac{d \ln H(a)^2}{d \ln a} \right) f - \frac{3}{2} \Omega_m(a) = 0
@@ -24,12 +24,45 @@ $$
 f(z) \approx \Omega_m^\gamma(z)
 $$
 
-In the ΛCDM model, we consider the growth index **$\gamma \approx 0.55$**. The main goal of this project is, by letting $\gamma$ free, see if we still have a **$H_0$** tension (known as **Hubble tension**) to consider - or not - a modified gravity model.
+In the ΛCDM model, we consider the growth index **$\gamma \approx 0.55$**. The main goal of this project is, by letting $\gamma$ free, see if we still have a **$H_0$** tension (known as **Hubble tension**) in order to consider - or not - a modified gravity model.
 
 ## ΛCDM model and the Hubble tension
+
+<img src="https://github.com/VicVEVO/Stage-irap/blob/0f8be1c1d3d29142fa1cea22d6c5db4e0da7b415/images/hubble_tension.png" align="left" width="500em"/>
+
 The **ΛCDM** model (**Lambda Cold Dark Matter**) is the standard cosmological model that extends Einstein’s equations of General Relativity to describe an accelerated expanding universe (Hubble expansion, distribution of galaxies, cosmic microwave background (**CMB**) etc.).
 
 Using the **ΛCDM** model and observations of the early universe, such as the **CMB**, gives one value, while direct measurements based on nearby objects like supernovae and Cepheid stars give a higher value.
+
+Late Universe Observation: $H_0 = 73.4 \pm 1.0$ km/Mpc/s.
+
+Early Universe Observation: $H_0 = 67.4 \pm 0.5$ km/Mpc/s.
+
+This mismatch might suggest the need for new physics beyond the standard cosmological model.
+<br clear="left"/>
+
+## Data presentation
+
+<details>
+  <summary><strong> 1. Redshift Space Distortion (RSD)</strong></summary>
+
+</details>
+
+<details>
+  <summary><strong> 2. Type Ia supernova (SN1a)</strong></summary>
+
+</details>
+
+<details>
+  <summary><strong> 3. Baryon Acoustic Oscillations (BAO)</strong></summary>
+
+</details>
+
+<details>
+  <summary><strong> 4. Weak gravitational lensing (SN1a)</strong></summary>
+
+</details>
+
 # Usage
 
 This project is provided as a **Python library** with Jupyter notebooks for demonstrations.
@@ -125,94 +158,102 @@ Example to initialize the $\chi^2$ calculator:
 The module `cosmo.py` implements core cosmological quantities required for the χ² analysis.  
 Below are the main observables and their definitions:
 
-### 1. RSD : Growth rate observable $f\sigma_8(z)$
+<details>
+  <summary><strong> 1. RSD : Growth rate observable fσ₈(z)</strong></summary>
+  
+  The product of the linear growth rate $f(z)$ and the amplitude of matter fluctuations $\sigma_8(z)$:
 
-The product of the linear growth rate $f(z)$ and the amplitude of matter fluctuations $\sigma_8(z)$:
+  <div align="center">
+    $f\sigma_8(z) = f(z) \cdot \sigma_8(z)$
+  </div>
+  
+  where
+  
+  - $f(z) = \dfrac{d \ln D(z)}{d \ln a}$ is the **growth rate of structure**  
+  - $D(z)$ is the linear growth factor normalized at $z=0$  
+  - $\sigma_8(z) = D(z) \cdot \sigma_{8,0}$  
 
-$$
-f\sigma_8(z) = f(z) \cdot \sigma_8(z)
-$$
+  ---
+</details>
 
-where
+<details>
+  <summary><strong> 2. SN1a: Distance modulus μ(z)</strong></summary>
 
-- $f(z) = \dfrac{d \ln D(z)}{d \ln a}$ is the **growth rate of structure**  
-- $D(z)$ is the linear growth factor normalized at $z=0$  
-- $\sigma_8(z) = D(z) \cdot \sigma_{8,0}$  
+  The distance modulus used in supernova cosmology is defined as:
 
----
+  <div align="center">
+    $\mu(z) = 5 \cdot \log_{10} \left( \frac{d_L(z)}{1 \text{Mpc}} \right) + 25$
+  </div>
+  
+  where $d_L(z)$ is the **luminosity distance**:
+  
+  <div align="center">
+    $d_L(z) = (1+z) \cdot D_M(z)
+  </div>
+  
+  with $D_M(z)$ the transverse comoving distance.
+  
+  ---
+</details>
 
-### 2. SN1a: Distance modulus $\mu(z)$
+<details>
+  <summary><strong> 3. BAO observable: 𝐷ₘ/𝑟𝑑</strong></summary>
+  
+  The comoving angular diameter distance scaled by the sound horizon at the drag epoch $r_d$:
+  
+  <div align="center">
+    $\frac{D_M(z)}{r_d}$
+  </div>
+  
+  In a flat universe ($\Omega_k = 0$), the transverse comoving distance is simply the line-of-sight comoving distance:
+  
+  <div align="center">
+    $D_M(z) = D_C(z) = c \int_0^z \frac{dz'}{H(z')}$
+  </div>
+  
+  The BAO scale also involves the sound horizon at the drag epoch $r_d$:
+  
+  <div align="center">
+    $r_d = \int_{z_d}^{\infty} \frac{c_s(z)}{H(z)} \, dz$
+  </div>
+  
+  with the sound speed in the photon-baryon fluid given by:
+  
+  <div align="center">
+    $c_s(z) = \frac{c}{\sqrt{3 \, \left[1 + R(z)\right]}}$
+  </div>
+  
+  and
+  
+  <div align="center">
+    $R(z) = \frac{3 \rho_b(z)}{4 \rho_\gamma(z)} \;,$
+  </div>
+  
+  where $\rho_b$ is the baryon density and $\rho_\gamma$ the photon density.
+  
+  ---
+</details>
 
-The distance modulus used in supernova cosmology is defined as:
+<details>
+  <summary><strong> 4. Weak lensing observables: ξ₊ⁱʲ(θ) and ξ₋ⁱʲ(θ)</strong></summary>
+  
+  Weak gravitational lensing is described through the two-point correlation functions of the shear field,  
+  measured between redshift bins $i$ and $j$. They are defined as:
+  
+  <div align="center">
+    $\xi_\pm^{i,j}(\theta) = \sum_{\ell=2}^{\infty} \frac{2\ell+1}{2\pi \ell^2 (\ell+1)^2} \cdot (G^{+}_{\ell,2}(\cos \theta) \pm G^{-}(\cos \theta)) \cdot (C_EE^{i,j}(\ell) \pm C_BB^{i,j}(\ell))$
+  </div>
+  
+  where:
+  
+  - $\theta$ is the angular separation,
+  - $C_{EE}^{i,j}(\ell)$ and $C_{BB}^{i,j}(\ell)$ are the E- and B-mode shear power spectra,  
+  - $G_{\ell,2}^{+}$ and $G_{\ell,2}^{-}$ are **geometrical kernels** related to spin-2 spherical harmonics (`4.19`,  	[arXiv:astro-ph/9609149](https://arxiv.org/abs/astro-ph/9609149))
+  - the sum starts at $\ell = 2$ since lensing involves spin-2 fields.
+  
+  ---
+</details>
 
-$$
-\mu(z) = 5 \cdot \log_{10} \left( \frac{d_L(z)}{1 \text{Mpc}} \right) + 25
-$$
-
-where $d_L(z)$ is the **luminosity distance**:
-
-$$
-d_L(z) = (1+z) \cdot D_M(z)
-$$
-
-with $D_M(z)$ the transverse comoving distance.
-
----
-
-### 3. BAO observable: $D_M(z)/r_d$
-
-The comoving angular diameter distance scaled by the sound horizon at the drag epoch $r_d$:
-
-$$
-\frac{D_M(z)}{r_d}
-$$
-
-In a flat universe ($\Omega_k = 0$), the transverse comoving distance is simply the line-of-sight comoving distance:
-
-$$
-D_M(z) = D_C(z) = c \int_0^z \frac{dz'}{H(z')}
-$$
-
-The BAO scale also involves the sound horizon at the drag epoch $r_d$:
-
-$$
-r_d = \int_{z_d}^{\infty} \frac{c_s(z)}{H(z)} \, dz
-$$
-
-with the sound speed in the photon-baryon fluid given by:
-
-$$
-c_s(z) = \frac{c}{\sqrt{3 \, \left[1 + R(z)\right]}}
-$$
-
-and
-
-$$
-R(z) = \frac{3 \rho_b(z)}{4 \rho_\gamma(z)} \;,
-$$
-
-where $\rho_b$ is the baryon density and $\rho_\gamma$ the photon density.
-
----
-
-### 4. Weak lensing observables: $\xi_\pm^{i,j}(\theta)$
-
-Weak gravitational lensing is described through the two-point correlation functions of the shear field,  
-measured between redshift bins $i$ and $j$. They are defined as:
-
-$$
-\xi_\pm^{i,j}(\theta) = 
-\sum_{\ell=2}^{\infty} \frac{2\ell+1}{2\pi \ell^2 (\ell+1)^2} \cdot (G^{+}_{\ell,2}(\cos \theta) \pm G^{-}(\cos \theta)) \cdot (C_EE^{i,j}(\ell) \pm C_BB^{i,j}(\ell))
-$$
-
-where:
-
-- $\theta$ is the angular separation,
-- $C_{EE}^{i,j}(\ell)$ and $C_{BB}^{i,j}(\ell)$ are the E- and B-mode shear power spectra,  
-- $G_{\ell,2}^{+}$ and $G_{\ell,2}^{-}$ are **geometrical kernels** related to spin-2 spherical harmonics (`4.19`,  	[arXiv:astro-ph/9609149](https://arxiv.org/abs/astro-ph/9609149))
-- the sum starts at $\ell = 2$ since lensing involves spin-2 fields.
-
----
 
 These quantities are then combined in `Chi2Calculator` to compare with observational data (BAO, RSD, Supernovae, etc.).
 
