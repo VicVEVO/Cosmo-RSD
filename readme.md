@@ -24,12 +24,12 @@ $$
 f(z) \approx \Omega_m^\gamma(z)
 $$
 
-With $\gamma$ the growth index.
+In the ΛCDM model, we consider the growth index **$\gamma \approx 0.55$**. The main goal of this project is, by letting $\gamma$ free, see if we still have a **$H_0$** tension (known as **Hubble tension**) to consider - or not - a modified gravity model.
 
-In the $\Lambda$ CDM model, we consider **$\gamma \approx 0.55$**. The main goal of this project is, by letting $\gamma$ free, see if we still have a **$H_0$** tension (known as **Hubble tension**) to consider - or not - a modified gravity model.
+## ΛCDM model and the Hubble tension
+The **ΛCDM** model (**Lambda Cold Dark Matter**) is the standard cosmological model that extends Einstein’s equations of General Relativity to describe an accelerated expanding universe (Hubble expansion, distribution of galaxies, cosmic microwave background (**CMB**) etc.).
 
-## 
-
+Using the **ΛCDM** model and observations of the early universe, such as the **CMB**, gives one value, while direct measurements based on nearby objects like supernovae and Cepheid stars give a higher value.
 # Usage
 
 This project is provided as a **Python library** with Jupyter notebooks for demonstrations.
