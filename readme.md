@@ -5,8 +5,30 @@
 </div>
 
 # About this project
+## Introduction
+On sub-horizon scales, in the linear regime, and assuming that dark energy does not cluster, the evolution equation for the growth function is given by
 
-[...]
+$$
+\frac{d f(a)}{d \ln a} + f^2 + \left( 2 + \frac{1}{2} \frac{d \ln H(a)^2}{d \ln a} \right) f - \frac{3}{2} \Omega_m(a) = 0
+$$
+
+Where:
+- $\Omega_m(a) \equiv \Omega_{m,0}a^{-3}\frac{H_0^2}{H(a)^2}$
+- With:
+    - $\Omega_{m,0} \equiv \Omega_m(z=0)$ the **matter density** today.
+    - $H(a)$ the Hubble rate as a function of the **scale factor $a$**.
+
+A good approximation for **$f(z)$** is generally:
+
+$$
+f(z) \approx \Omega_m^\gamma(z)
+$$
+
+With $\gamma$ the growth index.
+
+In the $\Lambda$ CDM model, we consider **$\gamma \approx 0.55$**. The main goal of this project is, by letting $\gamma$ free, see if we still have a **$H_0$** tension (known as **Hubble tension**) to consider - or not - a modified gravity model.
+
+## 
 
 # Usage
 
@@ -187,7 +209,7 @@ where:
 
 - $\theta$ is the angular separation,
 - $C_{EE}^{i,j}(\ell)$ and $C_{BB}^{i,j}(\ell)$ are the E- and B-mode shear power spectra,  
-- $G_{\ell,2}^{+}$ and $G_{\ell,2}^{-}$ are **geometrical kernels** related to spin-2 spherical harmonics,
+- $G_{\ell,2}^{+}$ and $G_{\ell,2}^{-}$ are **geometrical kernels** related to spin-2 spherical harmonics (`4.19`,  	[arXiv:astro-ph/9609149](https://arxiv.org/abs/astro-ph/9609149))
 - the sum starts at $\ell = 2$ since lensing involves spin-2 fields.
 
 ---
