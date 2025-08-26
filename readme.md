@@ -33,14 +33,12 @@ In the ΛCDM model, we consider the growth index **$\gamma \approx 0.55$**. The 
 The **ΛCDM** model (**Lambda Cold Dark Matter**) is the standard cosmological model that extends Einstein’s equations of General Relativity to describe an accelerated expanding universe (Hubble expansion, distribution of galaxies, cosmic microwave background (**CMB**) etc.).
 
 Using the **ΛCDM** model and observations of the early universe, such as the **CMB**, gives one value, while direct measurements based on nearby objects like supernovae and Cepheid stars give a higher value.
-
+<br clear="left"/>
 Late Universe Observation: $H_0 = 73.4 \pm 1.0$ km/Mpc/s.
 
 Early Universe Observation: $H_0 = 67.4 \pm 0.5$ km/Mpc/s.
 
 This mismatch might suggest the need for new physics beyond the standard cosmological model.
-<br clear="left"/>
-
 ## Data presentation
 
 <details>
