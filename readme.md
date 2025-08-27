@@ -59,6 +59,20 @@ This mismatch might suggest the need for new physics beyond the standard cosmolo
 
 <details>
   <summary><strong> 4. Weak gravitational lensing (SN1a)</strong></summary>
+  
+  We will use [DES Y3 + KiDS-1000 fits table](https://des.ncsa.illinois.edu/releases/y3a2/Y3key-joint-des-kids) including: the DES Y3 two-point correlation functions measured from a slightly reduced footprint to remove areal overlap with KiDS-1000.
+
+  This fits file includes:
+  - A `xip` (resp. `xim`) column including:
+    - $\xi^+$ values (`fits_file['xip']['VALUE']`) (resp. $\xi^-$ with `xim`).
+    - Mean $\theta$ values (`fits_file['xip']['ANG']`) and bins (`fits_file['xip']['BIN1']` and `BIN2`) with which $\xi^\pm$ values were measured.
+  - A `nz_source_des` column including:
+    - $n_{i_{bin}}(z)$ values with $i_{bin} \in \{1, 2, 3, 4\}$ (`fits_file['nz_source_des']['BIN1']` etc.).
+    - Mean $z$ values (`fits_file['nz_source_des']['Z_MID']`) with which $n_{i_{bin}}(z)$ were measured.
+  - A `nz_source_kids` column including:
+    - $n_{i_{bin}}(z)$ values with $i_{bin} \in \{1, 2, 3, 4, 5\}$ (`fits_file['nz_source_kids']['BIN1']` etc.).
+    - Mean $z$ values (`fits_file['nz_source_kids']['Z_MID']`) with which $n_{i_{bin}}(z)$ were measured.
+  - A `COVMAT` column including $(475,475)$ covariance matrix for the [ξ⁺DES; ξ⁻DES; EₙKiDS] concatenated vector in such order that 200 + 200 + 75 = 475.
 
 </details>
 
@@ -240,15 +254,23 @@ Below are the main observables and their definitions:
   measured between redshift bins $i$ and $j$. They are defined as:
   
   <div align="center">
-    $\xi_\pm^{i,j}(\theta) = \sum_{\ell=2}^{\infty} \frac{2\ell+1}{2\pi \ell^2 (\ell+1)^2} \cdot (G^{+}_{\ell,2}(\cos \theta) \pm G^{-}_{\ell,2}(\cos \theta)) \cdot (C_{EE}^{i,j}(\ell) \pm C_{BB}^{i,j}(\ell))$
+    $\xi_\pm^{i,j}(\theta) = \sum_{\ell=2}^{\infty} \frac{2\ell+1}{4\pi} \cdot (C_{\ell}^{\epsilon\epsilon}(i,j) \pm C_{\ell}^{\beta\beta}(i,j)) \cdot d^{\ell}_{2 \pm 2}(\theta) $
   </div>
   
   where:
   
   - $\theta$ is the angular separation,
-  - $C_{EE}^{i,j}(\ell)$ and $C_{BB}^{i,j}(\ell)$ are the E- and B-mode shear power spectra,  
-  - $G_{\ell,2}^{+}$ and $G_{\ell,2}^{-}$ are **geometrical kernels** related to spin-2 spherical harmonics (`4.19`,  	[arXiv:astro-ph/9609149](https://arxiv.org/abs/astro-ph/9609149))
+  - $C_{\ell}^{\epsilon\epsilon}(i,j)$ and $C_{\ell}^{\beta\beta}(i,j)$ are the E- and B-mode shear power spectra,  
+  - $d^{\ell}_{mn}$ is the reduced Wigner D-matrix,
   - the sum starts at $\ell = 2$ since lensing involves spin-2 fields.
+
+  We can use the **Flat sky approximation** since in both DESY3 and KiDS data, the angular scales analyzed reach small values in the range of a few arcminutes:
+
+  - We replace the expansion in spherical harmonics by an expansion in Fourier modes, giving:
+    - $C_{\ell}^{\epsilon\epsilon} \approx \frac{\ell^4}{4} C_{\ell}^{\phi\phi}$
+  - The reduced D-matrices for high multipoles can be approximated by Bessel functions:
+    - $d^{\ell}_{2,2}(\theta) \approx J_0(\ell\theta)$
+    - $d^{\ell}_{2,-2}(\theta) \approx J_4(\ell\theta)$
   
   ---
 </details>
