@@ -189,7 +189,7 @@ def _P_k_z(k, A_s, k_star, n_s, Tdm):
     return P_R * Tdm**2
 
 @njit
-def _T_k_z(k, z, Omega_m_0, Omega_b_0,Omega_gamma, h, c, fact):
+def _T_k_z(k, z, Omega_m_0, Omega_b_0, Omega_gamma, h, c, fact):
     """T(k, z)
 
     Args:
