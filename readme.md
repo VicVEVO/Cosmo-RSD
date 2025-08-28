@@ -45,21 +45,39 @@ This mismatch might suggest the need for new physics beyond the standard cosmolo
 <details>
   <summary><strong> 1. Redshift Space Distortion (RSD)</strong></summary>
 
+  We will use a given data collection from [ΛCDM is alive and well](https://arxiv.org/abs/2205.05017) paper, including: 
+  - $f\sigma_8$ measured values (`data_rsd['fsig8']`) for given redshifts $z$ (`data_rsd['z']`).
+  - Measurement errors $\Delta^+ f\sigma_8$ (`data_rsd['fsig8_err_plus']`) and $\Delta^- f\sigma_8$ (`data_rsd['fsig8_err_minus']`).
+
+  ---
 </details>
 
 <details>
   <summary><strong> 2. Type Ia supernova (SN1a)</strong></summary>
 
+  We will use [Pantheon+ DATA](https://github.com/PantheonPlusSH0ES/DataRelease.git), including:
+  - A `Pantheon+SH0ES.dat` data file with the given columns:
+    - `zCMB`: CMB Corrected Redshift.
+    - `m_b_corr`: Tripp1998 corrected/standardized $\mu_b$ magnitude.
+    - `CEPH_DIST`: Cepheid calculated absolute distance to host (uncertainty is incorporated in covariance matrix `Pantheon+SH0ES_STAT+SYS.cov`).
+    - `IS_CALIBRATOR`: Binary to designate if this **SN** is in a host that has an associated cepheid distance.
+  - A `Pantheon+SH0ES_STAT+SYS.cov` file with the covariance matrix stored in.
+
+  ---
 </details>
 
 <details>
   <summary><strong> 3. Baryon Acoustic Oscillations (BAO)</strong></summary>
 
+  We will use a given data collection from [DESI 2024 VI: Cosmological Constraints from the Measurements of Baryon Acoustic Oscillations](https://arxiv.org/abs/2404.03002) paper, including: 
+  - $\frac{D_m}{r_d}$ measured values (`DM/rd` column) with errors (`DM/rd_err` column) for given redshifts $z$ (`zeff` column).
+
+  ---
 </details>
 
 <details>
   <summary><strong> 4. Weak gravitational lensing (SN1a)</strong></summary>
-  
+
   We will use [DES Y3 + KiDS-1000 fits table](https://des.ncsa.illinois.edu/releases/y3a2/Y3key-joint-des-kids) including: the DES Y3 two-point correlation functions measured from a slightly reduced footprint to remove areal overlap with KiDS-1000.
 
   This fits file includes:
@@ -74,6 +92,7 @@ This mismatch might suggest the need for new physics beyond the standard cosmolo
     - Mean $z$ values (`fits_file['nz_source_kids']['Z_MID']`) with which $n_{i_{bin}}(z)$ were measured.
   - A `COVMAT` column including $(475,475)$ covariance matrix for the [ξ⁺DES; ξ⁻DES; EₙKiDS] concatenated vector in such order that 200 + 200 + 75 = 475.
 
+  ---
 </details>
 
 # Usage
@@ -91,7 +110,7 @@ pip install -r requirements.txt
 ## Core functionality
 
 The utils library is dedicated to computing $\chi^2$ confidence contours in different parameter planes.
-We focus mainly on cosmological parameters:
+We mainly focus on cosmological parameters:
 
 - $\Omega_m$ (`Omega_m`): matter density
 - $\sigma_8$ (`sigma_8`): amplitude of density fluctuations
