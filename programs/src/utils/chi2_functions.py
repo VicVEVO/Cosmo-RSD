@@ -11,7 +11,7 @@ from scipy.stats import gaussian_kde
 # CHI2 CALCULATION FUNCTIONS
 # ======================================================================
 @njit
-def chi2_rsd(z_data, fs8_data, fs8_err_plus, fs8_err_minus, omega_m, sigma_8, gamma):
+def chi2_rsd(z_data, fs8_data, fs8_err_plus, fs8_err_minus, Omega_m_0, sigma_8, gamma):
     """ Returns chi2 value for a given Omega_m, sigma_8, gamma.
 
     Args:
@@ -19,21 +19,21 @@ def chi2_rsd(z_data, fs8_data, fs8_err_plus, fs8_err_minus, omega_m, sigma_8, ga
         fs8_data (array): constants.fs8_data.values
         fs8_err_plus (array)
         fs8_err_minus (array)
-        omega_m (float)
+        Omega_m_0 (float)
         sigma_8 (float)
         gamma (float)
 
     Returns:
         float: chi2
     """
-    model = cosmo.fs8(z_data, gamma=gamma, omegam_0=omega_m, sigma8_0=sigma_8)
+    model = cosmo.fs8(z_data, gamma=gamma, Omega_m_0=Omega_m_0, sigma_8_0=sigma_8)
 
     errors = np.asarray(0.5 * (fs8_err_plus + fs8_err_minus))
     residuals = (model - fs8_data) / errors
     return np.sum(residuals**2)
 
 @njit
-def chi2_panth(n_panth, z_data_panth, is_calibrator_panth, m_b_corr_panth, ceph_dist_panth, inv_cov_panth, omega_m, H0, M, c):
+def chi2_panth(n_panth, z_data_panth, is_calibrator_panth, m_b_corr_panth, ceph_dist_panth, inv_cov_panth, Omega_m_0, H0, M, c):
     """Returns chi2 value for a given Omega_m, H0, M according to Pantheon+ data.
 
     Args:
@@ -43,7 +43,7 @@ def chi2_panth(n_panth, z_data_panth, is_calibrator_panth, m_b_corr_panth, ceph_
         m_b_corr_panth (array)
         ceph_dist_panth (array)
         inv_cov_panth (array)
-        omega_m (float)
+        Omega_m_0 (float)
         H0 (float)
         M (float)
         c (float)
@@ -55,14 +55,14 @@ def chi2_panth(n_panth, z_data_panth, is_calibrator_panth, m_b_corr_panth, ceph_
 
     for i in range(n_panth):
         if is_calibrator_panth[i] == 0:
-            delta_mu[i] = cosmo.mu(z_data_panth[i], omega_m, H0, c) - (m_b_corr_panth[i] - M)
+            delta_mu[i] = cosmo.mu(z = z_data_panth[i], Omega_m_0 = Omega_m_0, H0=H0, c=c) - (m_b_corr_panth[i] - M)
         else:
             delta_mu[i] = m_b_corr_panth[i] - M - ceph_dist_panth[i]
 
     return delta_mu @ inv_cov_panth @ delta_mu
 
 @njit
-def chi2_bao_dmrd(z_data, dmrd_data, dmrd_err, c, omega_m, rd, H0):
+def chi2_bao_dmrd(z_data, dmrd_data, dmrd_err, c, Omega_m_0, rd, H0):
     """Returns chi2 value for a given omega, rd, H0 according to dm/rd (from BAO) data.
 
     Args:
@@ -70,22 +70,22 @@ def chi2_bao_dmrd(z_data, dmrd_data, dmrd_err, c, omega_m, rd, H0):
         dmrd_data (array)
         dmrd_err (array)
         c (float)
-        omega_m (float)
+        Omega_m_0 (float)
         rd (float)
         H0 (float)
 
     Returns:
         float: chi2
     """
-    model = cosmo.Dmrd_array(z_data, omega_m, rd, H0, c)
+    model = cosmo.Dmrd_array(z_array=z_data, Omega_m_0=Omega_m_0, rd=rd, H0=H0, c=c)
     residuals = (model - dmrd_data) / dmrd_err
     return np.sum(residuals**2)
 
-def compute_chi2_grid_desy3(omega_m_data, sigma_8_data, omega_m_vals, sigma_8_vals):
-    X, Y = np.meshgrid(omega_m_vals, sigma_8_vals)
+def compute_chi2_grid_desy3(Omega_m_0_data, sigma_8_data, Omega_m_0_vals, sigma_8_vals):
+    X, Y = np.meshgrid(Omega_m_0_vals, sigma_8_vals)
     positions = np.vstack([X.ravel(), Y.ravel()])
 
-    values = np.vstack([omega_m_data, sigma_8_data])
+    values = np.vstack([Omega_m_0_data, sigma_8_data])
     kde = gaussian_kde(values)
     density = kde(positions).reshape(X.shape)
 
@@ -97,27 +97,27 @@ def compute_chi2_grid_desy3(omega_m_data, sigma_8_data, omega_m_vals, sigma_8_va
     return np.asarray(delta_chi2_grid_desy3)
 
 @njit
-def compute_chi2(use_rsd, use_bao, use_panth, use_desy3, omega_m_array, delta_omega_m, sigma_8_array, delta_sigma_8, z_data_rsd, z_data_panth, z_data_bao, fs8_data, fs8_err_plus, fs8_err_minus, dmrd_data, dmrd_err, n_panth, is_calibrator_panth, m_b_corr_panth, ceph_dist_panth, inv_cov_panth, c, chi2_grid_desy3, omega_m, sigma_8, gamma, rd, H0, M):
+def compute_chi2(use_rsd, use_bao, use_panth, use_desy3, Omega_m_0_array, delta_Omega_m_0, sigma_8_array, delta_sigma_8, z_data_rsd, z_data_panth, z_data_bao, fs8_data, fs8_err_plus, fs8_err_minus, dmrd_data, dmrd_err, n_panth, is_calibrator_panth, m_b_corr_panth, ceph_dist_panth, inv_cov_panth, c, chi2_grid_desy3, Omega_m_0, sigma_8, gamma, rd, H0, M):
     chi2_val = 0.0
     if use_rsd:
-        chi2_val += chi2_rsd(z_data_rsd, fs8_data, fs8_err_plus, fs8_err_minus, omega_m, sigma_8, gamma)
+        chi2_val += chi2_rsd(z_data_rsd, fs8_data, fs8_err_plus, fs8_err_minus, Omega_m_0, sigma_8, gamma)
     if use_panth:
-        chi2_val += chi2_panth(n_panth, z_data_panth, is_calibrator_panth, m_b_corr_panth, ceph_dist_panth, inv_cov_panth, omega_m, H0, M, c)
+        chi2_val += chi2_panth(n_panth, z_data_panth, is_calibrator_panth, m_b_corr_panth, ceph_dist_panth, inv_cov_panth, Omega_m_0, H0, M, c)
     if use_bao:
-        chi2_val += chi2_bao_dmrd(z_data_bao, dmrd_data, dmrd_err, c, omega_m, rd, H0)
+        chi2_val += chi2_bao_dmrd(z_data_bao, dmrd_data, dmrd_err, c, Omega_m_0, rd, H0)
     if use_desy3:
-        i_omega = tools.find_index(omega_m, omega_m_array, delta_omega_m)
+        i_omega = tools.find_index(Omega_m_0, Omega_m_0_array, delta_Omega_m_0)
         i_sigma = tools.find_index(sigma_8, sigma_8_array, delta_sigma_8)
         chi2_val += chi2_grid_desy3[i_omega, i_sigma]
     return chi2_val
 
 
-def chi2_for_const_gamma(chi2_func, omega_m, sigma_8, params_used):
+def chi2_for_const_gamma(chi2_func, Omega_m_0, sigma_8, params_used):
     """Returns minimum chi2 value for a given Omega_m, sigma_8 with a free gamma, rd, H0, M.
 
     Args:
         chi2_func (fun)
-        omega_m (float)
+        Omega_m_0 (float)
         sigma_8 (float)
         params_used (list): 
             - [L_1, .., L_6]
@@ -127,17 +127,17 @@ def chi2_for_const_gamma(chi2_func, omega_m, sigma_8, params_used):
     Returns:
         float: the minimum chi2 value
     """
-    initial_params = {"omega_m":omega_m, "sigma_8":sigma_8, "gamma":constants.GAMMA, "rd":constants.RD, "H0":constants.H0, "M":constants.M}
+    initial_params = {"Omega_m_0":Omega_m_0, "sigma_8":sigma_8, "gamma":constants.GAMMA, "rd":constants.RD, "H0":constants.H0, "M":constants.M}
     minimizer = get_minimizer(chi2_func, params_used, initial_params)
     minimizer.migrad()
     return minimizer.fval
 
-def chi2_for_const_sigma_8(chi2_func, omega_m, gamma, params_used):
+def chi2_for_const_sigma_8(chi2_func, Omega_m_0, gamma, params_used):
     """Returns minimum chi2 value for a given Omega_m, gamma with a free sigma_8, rd, H0, M.
 
     Args:
         chi2_func (fun)
-        omega_m (float)
+        Omega_m_0 (float)
         gamma (float)
         params_used (list): 
             - [L_1, .., L_6]
@@ -147,12 +147,12 @@ def chi2_for_const_sigma_8(chi2_func, omega_m, gamma, params_used):
     Returns:
         float: the minimum chi2 value
     """
-    initial_params = {"omega_m":omega_m, "sigma_8":constants.SIGMA_8_0, "gamma":gamma, "rd":constants.RD, "H0":constants.H0, "M":constants.M}
+    initial_params = {"Omega_m_0":Omega_m_0, "sigma_8":constants.SIGMA_8_0, "gamma":gamma, "rd":constants.RD, "H0":constants.H0, "M":constants.M}
     minimizer = get_minimizer(chi2_func, params_used, initial_params)
     minimizer.migrad()
     return minimizer.fval
 
-def chi2_for_const_omega_m(chi2_func, sigma_8, gamma, params_used):
+def chi2_for_const_Omega_m_0(chi2_func, sigma_8, gamma, params_used):
     """Returns minimum chi2 value for a given sigma_8, gamma with a free Omega_m, rd, H0, M.
 
     Args:
@@ -167,7 +167,7 @@ def chi2_for_const_omega_m(chi2_func, sigma_8, gamma, params_used):
     Returns:
         float: the minimum chi2 value
     """
-    initial_params = {"omega_m":constants.OMEGAM_0, "sigma_8":sigma_8, "gamma":gamma, "rd":constants.RD, "H0":constants.H0, "M":constants.M}
+    initial_params = {"Omega_m_0":constants.OMEGAM_0, "sigma_8":sigma_8, "gamma":gamma, "rd":constants.RD, "H0":constants.H0, "M":constants.M}
     minimizer = get_minimizer(chi2_func, params_used, initial_params)
     minimizer.migrad()
     return minimizer.fval
@@ -267,7 +267,7 @@ def get_minimizer(chi2_func, params_used, initial_params):
     assert len(params_used)==6, ValueError(
           f"Expected 6 parameters, got {len(params_used)}.")
     
-    minimizer = Minuit(chi2_func, omega_m=initial_params["omega_m"], sigma_8=initial_params["sigma_8"], gamma=initial_params["gamma"], rd=initial_params["rd"], H0=initial_params["H0"], M=initial_params["M"])
+    minimizer = Minuit(chi2_func, Omega_m_0=initial_params["Omega_m_0"], sigma_8=initial_params["sigma_8"], gamma=initial_params["gamma"], rd=initial_params["rd"], H0=initial_params["H0"], M=initial_params["M"])
     for param_used in params_used:
         if param_used[1]:
             minimizer.fixed[param_used[0]] = True

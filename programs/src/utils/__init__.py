@@ -1,6 +1,6 @@
 from .constants import *
 from .data_loader import *
-from . import cosmo, chi2_functions, polynoms
+from . import cosmo, chi2_functions, polynoms, bessel
 
 import numpy as np
 from joblib import Parallel, delayed
@@ -19,15 +19,15 @@ class Chi2Calculator:
         self.use_desy3 = desy3
         self.chi2_grid = GridConfig(N=N, is_highres=is_highres)
         self.desy3_grid = chi2_functions.compute_chi2_grid_desy3(Om_data_arico, sigma8_data_arico,
-                self.chi2_grid.omega_m_vals, self.chi2_grid.sigma_8_vals) ### Temporary
+                self.chi2_grid.Omega_m_0_vals, self.chi2_grid.sigma_8_vals) ### Temporary
         self.chi2_func = partial(
             chi2_functions.compute_chi2,
             rsd,
             bao,
             pantheon,
             desy3,
-            self.chi2_grid.omega_m_vals,
-            self.chi2_grid.delta_omega_m,
+            self.chi2_grid.Omega_m_0_vals,
+            self.chi2_grid.delta_Omega_m_0,
             self.chi2_grid.sigma_8_vals,
             self.chi2_grid.delta_sigma_8,
             z_data_rsd,
@@ -45,7 +45,7 @@ class Chi2Calculator:
             inv_cov_panth,
             C,
             chi2_functions.compute_chi2_grid_desy3(Om_data_arico, sigma8_data_arico,
-                self.chi2_grid.omega_m_vals, self.chi2_grid.sigma_8_vals)
+                self.chi2_grid.Omega_m_0_vals, self.chi2_grid.sigma_8_vals)
         )
 
     def __str__(self):
@@ -57,22 +57,22 @@ class Chi2Calculator:
         
         if id_grid == 1:
             params_used = self.get_params_used([True, True, False, is_M_free_minim, is_H0_free_minim, is_rd_free_minim])
-            chi2_grid1 = Parallel(n_jobs=-1)(delayed(chi2_functions.chi2_for_const_gamma)(self.chi2_func, omega_m, sigma_8, params_used) for sigma_8 in self.chi2_grid.sigma_8_vals for omega_m in self.chi2_grid.omega_m_vals)
+            chi2_grid1 = Parallel(n_jobs=-1)(delayed(chi2_functions.chi2_for_const_gamma)(self.chi2_func, Omega_m_0, sigma_8, params_used) for sigma_8 in self.chi2_grid.sigma_8_vals for Omega_m_0 in self.chi2_grid.Omega_m_0_vals)
             self.chi2_grid.chi2_grid1 = np.array(chi2_grid1).reshape(self.chi2_grid.n_s8, self.chi2_grid.n_om)
         elif id_grid == 2:
             params_used = self.get_params_used([True, False, True, is_M_free_minim, is_H0_free_minim, is_rd_free_minim])
-            chi2_grid2 = Parallel(n_jobs=-1)(delayed(chi2_functions.chi2_for_const_sigma_8)(self.chi2_func, omega_m, gamma, params_used) for omega_m in self.chi2_grid.omega_m_vals for gamma in self.chi2_grid.gamma_vals)
+            chi2_grid2 = Parallel(n_jobs=-1)(delayed(chi2_functions.chi2_for_const_sigma_8)(self.chi2_func, Omega_m_0, gamma, params_used) for Omega_m_0 in self.chi2_grid.Omega_m_0_vals for gamma in self.chi2_grid.gamma_vals)
             self.chi2_grid.chi2_grid2 = np.array(chi2_grid2).reshape(self.chi2_grid.n_om, self.chi2_grid.n_gamma)
         else:
             params_used = self.get_params_used([False, True, True, is_M_free_minim, is_H0_free_minim, is_rd_free_minim])
-            chi2_grid3 = Parallel(n_jobs=-1)(delayed(chi2_functions.chi2_for_const_omega_m)(self.chi2_func, sigma_8, gamma, params_used) for sigma_8 in self.chi2_grid.sigma_8_vals for gamma in self.chi2_grid.gamma_vals)
+            chi2_grid3 = Parallel(n_jobs=-1)(delayed(chi2_functions.chi2_for_const_Omega_m_0)(self.chi2_func, sigma_8, gamma, params_used) for sigma_8 in self.chi2_grid.sigma_8_vals for gamma in self.chi2_grid.gamma_vals)
             self.chi2_grid.chi2_grid3 = np.array(chi2_grid3).reshape(self.chi2_grid.n_s8, self.chi2_grid.n_gamma)
     
     def get_params_used(self, is_used_list:bool):
         assert len(is_used_list)==6, ValueError(
                 f"Expected a 6 booleans for the used parameters, got {len(is_used_list)}.")
         params_used = []
-        return [["omega_m", is_used_list[0], (self.chi2_grid.om_min, self.chi2_grid.om_max)],
+        return [["Omega_m_0", is_used_list[0], (self.chi2_grid.om_min, self.chi2_grid.om_max)],
                 ["sigma_8", is_used_list[1], (self.chi2_grid.s8_min, self.chi2_grid.s8_max)],
                 ["gamma", is_used_list[2], (self.chi2_grid.gamma_min, self.chi2_grid.gamma_max)],
                 ["M", is_used_list[3], (self.chi2_grid.M_min, self.chi2_grid.M_max)],
@@ -103,8 +103,8 @@ class Chi2Calculator:
             bao,
             pantheon,
             desy3,
-            self.chi2_grid.omega_m_vals,
-            self.chi2_grid.delta_omega_m,
+            self.chi2_grid.Omega_m_0_vals,
+            self.chi2_grid.delta_Omega_m_0,
             self.chi2_grid.sigma_8_vals,
             self.chi2_grid.delta_sigma_8,
             z_data_rsd,
@@ -122,7 +122,7 @@ class Chi2Calculator:
             inv_cov_panth,
             C,
             chi2_functions.compute_chi2_grid_desy3(Om_data_arico, sigma8_data_arico,
-                self.chi2_grid.omega_m_vals, self.chi2_grid.sigma_8_vals)
+                self.chi2_grid.Omega_m_0_vals, self.chi2_grid.sigma_8_vals)
         )
 
     def get_grid(self, id_grid:int):
@@ -167,13 +167,13 @@ class Chi2Calculator:
 
         if id_grid == 1:
             chi2_grid = self.chi2_grid.chi2_grid1
-            x_vals = self.chi2_grid.omega_m_vals
+            x_vals = self.chi2_grid.Omega_m_0_vals
             y_vals = self.chi2_grid.sigma_8_vals
             labels = [r"$\Omega_m$", r"$\sigma_8$"]
         elif id_grid == 2:
             chi2_grid = self.chi2_grid.chi2_grid2
             x_vals = self.chi2_grid.gamma_vals
-            y_vals = self.chi2_grid.omega_m_vals
+            y_vals = self.chi2_grid.Omega_m_0_vals
             labels = [r"$\gamma$", r"$\Omega_m$"]
         else:
             chi2_grid = self.chi2_grid.chi2_grid3
@@ -265,13 +265,13 @@ class GridConfig:
             self.gamma_max = gamma_max_lowres
             self.FOLDER = "lowres"
         
-        self.omega_m_vals = np.asarray(np.linspace(self.om_min, self.om_max, self.n_om))
+        self.Omega_m_0_vals = np.asarray(np.linspace(self.om_min, self.om_max, self.n_om))
         self.sigma_8_vals = np.asarray(np.linspace(self.s8_min, self.s8_max, self.n_s8))
         self.gamma_vals = np.asarray(np.linspace(self.gamma_min, self.gamma_max, self.n_gamma))
         self.rd_vals = np.asarray(np.linspace(self.rd_min, self.rd_max, self.n_rd))
         self.H0_vals = np.asarray(np.linspace(self.H0_min, self.H0_max, self.n_H0))
 
-        self.delta_omega_m = self.omega_m_vals[1] - self.omega_m_vals[0]
+        self.delta_Omega_m_0 = self.Omega_m_0_vals[1] - self.Omega_m_0_vals[0]
         self.delta_sigma_8 = self.sigma_8_vals[1] - self.sigma_8_vals[0]
             
     def __str__(self):

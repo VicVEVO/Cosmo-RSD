@@ -51,6 +51,18 @@ def fs8(z, gamma, Omega_m_0, sigma_8_0):
 ### SN1A theoretical calculation functions
 
 @njit
+def _E_LCDM(z, Omega_m_0):
+    return np.sqrt(Omega_m_0 * (1.0 + z)**3 + (1.0 - Omega_m_0))
+
+@njit
+def integral_trapezoid_inv_H_LCDM(a, b, N, c, H0, Omega_m_0):
+    step = (b - a) / N
+    result = 0.5 * (1.0 / _E_LCDM(a, Omega_m_0) + 1.0 / _E_LCDM(b, Omega_m_0))
+    for i_step in range(1, N):
+        result += 1.0 / _E_LCDM(a + i_step * step, Omega_m_0)
+    return (c / H0) * step * result
+
+@njit
 def _H_LCDM(z, H0, Omega_m_0):
     return H0 * np.sqrt(Omega_m_0 * (1+z)**3 + (1 - Omega_m_0))
 
@@ -60,8 +72,8 @@ def _inv_H_LCDM(z, H0, Omega_m_0):
 
 @njit
 def _dL(z, H0, Omega_m_0, c):
-    integral = integral_trapezoid(_inv_H_LCDM, 0.0, z, 100, H0=H0, Omega_m_0=Omega_m_0)
-    return (1 + z) * c * integral
+    integral = integral_trapezoid_inv_H_LCDM(0.0, z, 100, c=c, H0=H0, Omega_m_0=Omega_m_0)
+    return (1 + z) * integral
 
 @njit
 def mu(z, Omega_m_0, H0, c):
@@ -71,8 +83,8 @@ def mu(z, Omega_m_0, H0, c):
 
 @njit
 def _Dmrd(z, Omega_m_0, rd, H0, c):
-    integral = integral_trapezoid(_inv_H_LCDM, 0.0, z, 100, H0=H0, Omega_m_0=Omega_m_0)
-    return c * integral / rd
+    integral = integral_trapezoid_inv_H_LCDM(0.0, z, 100, c=c, H0=H0, Omega_m_0=Omega_m_0)
+    return integral / rd
 
 @njit
 def Dmrd_array(z_array, Omega_m_0, rd, H0, c):
@@ -104,25 +116,7 @@ def _z_d(Omega_m_0, Omega_b_0, h):
     return (1291 * omega_m_0**0.251) / (1 + 0.659 * omega_m_0**0.828) * (1 + b1 * omega_b_0**b2)
 
 @njit
-def _s(Omega_m_0, Omega_b_0, Omega_gamma, h):
-    """Sound scale (Mpc) (Eisenstein & Hu 1998 Eq. 6)
-    Args:
-        Omega_m_0 (float)
-        Omega_b_0 (float)
-        Omega_gamma (float)
-        h (float)
-    """
-    def integrand_s(z):
-        R = 0.75 * Omega_b_0 / Omega_gamma / (1 + z)
-        Hz = _H_LCDM(z, H0=100*h, Omega_m_0=Omega_m_0)
-        return c / np.sqrt(3 * (1 + R)) / Hz
-    
-    z_d_value = _z_d(Omega_m_0, Omega_b_0, h)
-    z_max = 1e5
-    return integral_trapezoid(func=integrand_s, a=z_d_value, b=z_max, N=100)
-
-@njit
-def _s2(omega_m_0, f_baryon):
+def _s(omega_m_0, f_baryon):
     """Sound scale approximation (Mpc)
 
     Args:
@@ -166,7 +160,7 @@ def _T_k(k, Omega_m_0, Omega_b_0, Omega_gamma, h):
     k_equality = 0.0746 * omega_m_0
     q = k / 13.41 / k_equality
     alpha_gamma_val = _alpha_gamma(omega_m_0, Omega_b_0*h**2)
-    q_eff = q / (alpha_gamma_val + (1-alpha_gamma_val) / (1 + (0.43*k * _s2(omega_m_0, f_baryon))**4))
+    q_eff = q / (alpha_gamma_val + (1-alpha_gamma_val) / (1 + (0.43*k * _s(omega_m_0, f_baryon))**4))
     T_nowiggles_L0 = np.log(2.0*np.e + 1.8*q_eff)
     T_nowiggles_C0 = 14.2 + 731.0 / (1 + 62.5 * q_eff)
     return T_nowiggles_L0 / (T_nowiggles_L0 + T_nowiggles_C0 * q_eff**2)
