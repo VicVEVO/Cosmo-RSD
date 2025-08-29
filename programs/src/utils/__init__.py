@@ -13,6 +13,7 @@ project_root = Path(__file__).parents[2] if "__file__" in globals() else Path().
 
 class Chi2Calculator:
     def __init__(self, N:int, is_highres:bool=False, rsd:bool=False, bao:bool=False, pantheon:bool=False, desy3:bool=False):
+        self.N = N
         self.use_rsd = rsd
         self.use_bao = bao
         self.use_pantheon = pantheon
@@ -138,16 +139,16 @@ class Chi2Calculator:
     def save_grid(self, id_grid:int, folder=project_root):
         """Save a grid in a given folder.
             Folder format examples:
-                PROJ_ROOT/output/2-BR/lowres/chi2_grid1.npz
-                PROJ_ROOT/output/1-P/highres/chi2_grid3.npz
+                PROJ_ROOT/output/chi2/2-BR/lowres/chi2_grid1-(N=50).npz
+                PROJ_ROOT/output/chi2/1-P/highres/chi2_grid3-(N=100).npz
 
         Parameters:
             id_grid (int): The index of the grid
             folder (string)
         """
-        output_dir = folder / "output" / self.filename() / self.chi2_grid.FOLDER
+        output_dir = folder / "output/chi2" / self.filename() / self.chi2_grid.FOLDER
         output_dir.mkdir(parents=True, exist_ok=True)
-        np.savez(output_dir / f"chi2_grid{str(id_grid)}.npz", grid1=self.get_grid(id_grid=id_grid))
+        np.savez(output_dir / f"chi2_grid{str(id_grid)}-(N={str(self.N)}).npz", grid1=self.get_grid(id_grid=id_grid))
 
     def plot_grid(self, id_grid:int, title:str=r"$\chi^2$ Confidence contours", display_best_chi2:bool=True, savefig:bool=False, folder=project_root, xlim=None, ylim=None, ax=None):
         """Plot chi2 confidence contours according to its given grid.
@@ -215,7 +216,7 @@ class Chi2Calculator:
         plt.tight_layout()
 
         if savefig:
-            fig.savefig(folder / "output/figures" / (self.filename() + "_" + str(id_grid) + ".png"), bbox_inches='tight')
+            fig.savefig(folder / "output/figures" / (self.filename() + "-grid" + str(id_grid) + "-[N=" + str(self.N) + "].png"), bbox_inches='tight')
 
     def plot_grids(self, title:str=r"$\chi^2$ Confidence contours", display_best_chi2:bool=True, savefig:bool=False, folder=project_root, xlim=None, ylim=None):
         fig, ax = plt.subplots(1, 3, figsize=(10, 5))
@@ -224,7 +225,7 @@ class Chi2Calculator:
             self.plot_grid(i, title="", display_best_chi2=display_best_chi2, folder=folder, xlim=xlim, ylim=ylim, ax=ax[i-1])
 
         if savefig:
-            fig.savefig(folder / "output/figures" / (self.filename() + "_triplot"+ ".png"), bbox_inches='tight')
+            fig.savefig(folder / "output/figures" / (self.filename() + "[N="+ str(self.N) + "]_allplots"+ ".png"), bbox_inches='tight')
 
 class GridConfig:
     def __init__(self, N: int, is_highres: bool):
