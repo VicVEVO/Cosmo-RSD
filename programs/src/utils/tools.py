@@ -1,6 +1,17 @@
 from numba import njit
 
 def integral_trapezoid(func, a, b, N, **kwargs):
+    """Gives the trapezoid integral approximation of a given function between a and b.
+
+    Args:
+        func : f(x, **kwargs) function
+        a (float): lower limit a
+        b (float): upper limit b
+        N (int): number of points (precision) used to approximate the integral
+
+    Returns:
+        float: the integral value
+    """
     h = (b - a) / N
     result = 0.5 * (func(a, **kwargs) + func(b, **kwargs))
     for i in range(1, N):

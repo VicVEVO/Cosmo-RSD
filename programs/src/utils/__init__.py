@@ -1,6 +1,6 @@
 from .constants import *
 from .data_loader import *
-from . import cosmo, chi2_functions, polynoms, bessel
+from . import cosmo, chi2_functions, bessel
 
 import numpy as np
 from joblib import Parallel, delayed
@@ -57,15 +57,15 @@ class Chi2Calculator:
         
         if id_grid == 1:
             params_used = self.get_params_used([True, True, False, is_M_free_minim, is_H0_free_minim, is_rd_free_minim])
-            chi2_grid1 = Parallel(n_jobs=-1)(delayed(chi2_functions.chi2_for_const_gamma)(self.chi2_func, Omega_m_0, sigma_8, params_used) for sigma_8 in self.chi2_grid.sigma_8_vals for Omega_m_0 in self.chi2_grid.Omega_m_0_vals)
+            chi2_grid1 = Parallel(n_jobs=-1)(delayed(chi2_functions.min_chi2_free_gamma)(self.chi2_func, Omega_m_0, sigma_8, params_used) for sigma_8 in self.chi2_grid.sigma_8_vals for Omega_m_0 in self.chi2_grid.Omega_m_0_vals)
             self.chi2_grid.chi2_grid1 = np.array(chi2_grid1).reshape(self.chi2_grid.n_s8, self.chi2_grid.n_om)
         elif id_grid == 2:
             params_used = self.get_params_used([True, False, True, is_M_free_minim, is_H0_free_minim, is_rd_free_minim])
-            chi2_grid2 = Parallel(n_jobs=-1)(delayed(chi2_functions.chi2_for_const_sigma_8)(self.chi2_func, Omega_m_0, gamma, params_used) for Omega_m_0 in self.chi2_grid.Omega_m_0_vals for gamma in self.chi2_grid.gamma_vals)
+            chi2_grid2 = Parallel(n_jobs=-1)(delayed(chi2_functions.min_chi2_free_sigma_8)(self.chi2_func, Omega_m_0, gamma, params_used) for Omega_m_0 in self.chi2_grid.Omega_m_0_vals for gamma in self.chi2_grid.gamma_vals)
             self.chi2_grid.chi2_grid2 = np.array(chi2_grid2).reshape(self.chi2_grid.n_om, self.chi2_grid.n_gamma)
         else:
             params_used = self.get_params_used([False, True, True, is_M_free_minim, is_H0_free_minim, is_rd_free_minim])
-            chi2_grid3 = Parallel(n_jobs=-1)(delayed(chi2_functions.chi2_for_const_Omega_m_0)(self.chi2_func, sigma_8, gamma, params_used) for sigma_8 in self.chi2_grid.sigma_8_vals for gamma in self.chi2_grid.gamma_vals)
+            chi2_grid3 = Parallel(n_jobs=-1)(delayed(chi2_functions.min_chi2_free_Omega_m_0)(self.chi2_func, sigma_8, gamma, params_used) for sigma_8 in self.chi2_grid.sigma_8_vals for gamma in self.chi2_grid.gamma_vals)
             self.chi2_grid.chi2_grid3 = np.array(chi2_grid3).reshape(self.chi2_grid.n_s8, self.chi2_grid.n_gamma)
     
     def get_params_used(self, is_used_list:bool):

@@ -63,14 +63,6 @@ def integral_trapezoid_inv_H_LCDM(a, b, N, c, H0, Omega_m_0):
     return (c / H0) * step * result
 
 @njit
-def _H_LCDM(z, H0, Omega_m_0):
-    return H0 * np.sqrt(Omega_m_0 * (1+z)**3 + (1 - Omega_m_0))
-
-@njit
-def _inv_H_LCDM(z, H0, Omega_m_0):
-    return 1.0 / _H_LCDM(z, H0, Omega_m_0)
-
-@njit
 def _dL(z, H0, Omega_m_0, c):
     integral = integral_trapezoid_inv_H_LCDM(0.0, z, 100, c=c, H0=H0, Omega_m_0=Omega_m_0)
     return (1 + z) * integral
