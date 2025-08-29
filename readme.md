@@ -110,6 +110,8 @@ Install dependencies via:
 pip install -r requirements.txt
 ```
 
+*Installing them one by one in a python virtual environment might be better*
+
 ## Core functionality
 
 The utils library is dedicated to computing $\chi^2$ confidence contours in different parameter planes.
