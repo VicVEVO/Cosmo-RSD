@@ -253,6 +253,8 @@ Only functions without a leading `_` are considered public.
     In the second interval, the [Hankel asymptotic expansion](https://dlmf.nist.gov/10.17) is employed with two rational functions of degree 6/6 and 7/7.
 
   - $J(x, n)$
+
+    This function is now a wrapper of jn.c (still from Cephes Mathematical Functions Library), using Continuous fraction method and backward recurrence. You can find all the formulas [here](https://www.osti.gov/servlets/purl/6148453).
   
   ---
 </details>
