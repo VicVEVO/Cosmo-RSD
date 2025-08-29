@@ -156,28 +156,116 @@ All results produced by the project (numerical results and plots) are saved in t
 Each Python module in `utils` is independent and modifiable.
 Only functions without a leading `_` are considered public.
 
-- `cosmo.py`
-    Provides cosmological functions (distances, Hubble parameter, growth functions, etc.).
-    Forms the physics backbone of the χ² calculation.
+<details>
+  <summary><strong> cosmo.py </strong></summary>
+  
+  `cosmo.py` Provides cosmological functions (distances, Hubble parameter, growth functions, etc.).
+    Forms the physics backbone of the χ² calculation:
+  
+  You may find further information in the [Cosmological Quantities section](#cosmological-quantities) below.
 
-- `chi2_functions.py`
-    Implements the Chi2Calculator class.
-    Handles $\chi^2$ minimization, grid construction, saving and loading results.
+  ---
+</details>
 
-- `constants.py`
-    Contains cosmological constants, grid resolution and which parameters are considered as constants when minimizing.
+<details>
+  <summary><strong> chi2_functions.py </strong></summary>
+  
+  `chi2_functions.py` implements the Chi2Calculator class.
+    Handles $\chi^2$ minimization, grid construction, saving and loading results:
 
-- `data_loader.py`
-    Reads and loads raw data in the `data` directory.
+  - `chi2_rsd` function, giving: $\chi^2_{\rm RSD} = \sum_{i} \frac{f\sigma_8(z_i^{\rm obs}) - f\sigma_8^{\rm obs}}{\sigma_i^2}$.
+    - With: $\sigma_i^2 = \frac{1}{2} \bigl( \sigma_{f\sigma_8}^{\rm +}(z_i) + \sigma_{f\sigma_8}^{\rm -}(z_i) \bigr)$.
+    - $f\sigma_8^{\rm obs}$ = `data_rsd['fsig8']`.
+    - $\sigma_{f\sigma_8}^{\rm +}$ = `data_rsd['fsig8_err_plus']` and $\sigma_{f\sigma_8}^{\rm -}$ = `data_rsd['fsig8_err_minus']`.
 
-- `tools.py`
-    Implements general python functions and procedures. 
+  - `chi2_panth` function, giving: $\chi^2_{\rm Pantheon+} = (\mu(z^{\rm obs})- \mu^{\rm obs}) ^T C^{-1} (\mu(z^{\rm obs})- \mu^{\rm obs})$.
 
-- `polynoms.py`
-    Implements a simplified Python polynom class to provide associated legendre polynoms for weak gravitational lensing data. 
+  - `chi2_bao_dmrd` function, giving: $\chi^2_{\rm DESIDR2} =\sum_{i} \frac{\frac{D_m}{r_d}(z_i^{\rm obs}) - \frac{D_m}{r_d}^{\rm obs}}{\sigma_i^2}$.
 
-- `__init__.py`
-    Exposes main functions and classes when importing utils.
+  - `compute_chi2_grid_desy3` function.
+
+  - `compute_chi2` function, giving: $\chi^2 = \chi^2_{\rm RSD} + \chi^2_{\rm Pantheon+} + \chi^2_{\rm DESIDR2} + \chi^2_{\rm DESY3 + KiDS-1000}$.
+
+  - `min_chi2_free_gamma` (resp. `min_chi2_free_sigma_8` and `min_chi2_free_Omega_m_0`) function, giving: $\displaystyle \min_{\gamma} \chi^2$ (resp. $\displaystyle \min_{\sigma_8} \chi^2$ and $\displaystyle \min_{\Omega_m} \chi^2$).
+
+  - `display_minimizer` procedure, displaying estimated parameters for a minimized function with [Minuit](https://github.com/scikit-hep/iminuit).
+
+  - `get_minimizer` function, giving the minimized $\chi^2$ value with iminuit depending on which parameters are fixed in $\chi^2$.
+  ---
+</details>
+
+<details>
+  <summary><strong> constants.py </strong></summary>
+  
+  `constants.py` contains cosmological constants, grid resolution and which parameters are considered as constants when minimizing.
+
+  - `highres` (resp. `lowres`) stands for how broad are the values taken for `Omega_m`, `sigma_8` and `gamma`.
+
+    High quality (`highres`) confidence contours:
+
+    - $\Omega_m \in 0.25, 0.5$
+    - $\sigma_8 \in 0.5, 1.05$
+    - $\gamma \in 0, 1.2$
+   
+    Low quality (`lowres`) confidence contours:
+
+    - $\Omega_m \in 0.50, 1$
+    - $\sigma_8 \in 0.4, 1.2$
+    - $\gamma \in -0.5, 2$
+   
+  - `is_X_free_minim` means whether X is considered free or fixed when minimizing $\chi^2$.
+    
+  ---
+</details>
+
+<details>
+  <summary><strong> data_loader.py </strong></summary>
+  
+  `data_loader.py` reads and loads raw data in the `data` directory.
+
+  ---
+</details>
+
+<details>
+  <summary><strong> tools.py </strong></summary>
+  
+  `tools.py` implements general python functions and procedures:
+
+  - `integral_trapezoid(func, a, b, N, **kwargs)` returns the integral of a given function between two points with the trapezoid approximation.
+  - `find_index(x, x_array, delta_x)` returns the corresponding index for an element in a linspace-sorted array.
+
+  ---
+</details>
+
+<details>
+  <summary><strong> bessel.py </strong></summary>
+  
+  `bessel.py` implements a `@njit` compatible bessel functions calculator, giving:
+  - $J_0(x)$
+  
+    This function is a wrapper for the [Cephes Mathematical Functions Library](http://www.netlib.org/cephes/) routine `j0.c`.
+    The domain is divided into the intervals [0, 5] and [5, $+\infty$]. In the first interval the following rational approximation is used: $J_0(x) \approx (w - r_1^2)(w - r_2^2) \frac{P_3(w)}{Q_8(w)}.$
+  
+    where:
+      - $w = x^2$ and $r_1$, $r_2$ are the roots of $J_0$.
+      - $P_3$ (resp. $Q_8$) is a polynom of degree 3 (resp. 8).
+   
+    In the second interval, the [Hankel asymptotic expansion](https://dlmf.nist.gov/10.17) is employed with two rational functions of degree 6/6 and 7/7.
+
+  - $J(x, n)$
+  
+  ---
+</details>
+
+<details>
+  <summary><strong> __init__.py </strong></summary>
+  
+  `__init__.py` exposes main functions and classes when importing utils.
+
+  You might find all the informations you need in [this example jupyter notebook file](https://github.com/VicVEVO/Stage-irap/blob/b63edcddd36a137bd7af26eac23597a50160b6e5/programs/src/notebooks/main.ipynb).
+
+  ---
+</details>
 
 ## Configuration
 The `cosmo` module and the `Chi2Calculator` class are configurable.
@@ -186,7 +274,7 @@ Example to initialize the $\chi^2$ calculator:
 
     chi2_calculator = Chi2Calculator(N=20, is_highres=True, rsd=True, pantheon=True)
 
-# Cosmological Quantities in `cosmo.py`
+# Cosmological Quantities
 The module `cosmo.py` implements core cosmological quantities required for the χ² analysis.  
 Below are the main observables and their definitions:
 
