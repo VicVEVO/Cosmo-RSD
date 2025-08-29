@@ -264,7 +264,7 @@ Only functions without a leading `_` are considered public.
   
   `__init__.py` exposes main functions and classes when importing utils.
 
-  You might find all the informations you need in [this example jupyter notebook file](https://github.com/VicVEVO/Stage-irap/blob/b63edcddd36a137bd7af26eac23597a50160b6e5/programs/src/notebooks/main.ipynb).
+  You might find all the informations you need in [this example jupyter notebook file](programs/src/notebooks/main.ipynb).
 
   ---
 </details>
