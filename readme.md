@@ -7,7 +7,7 @@
 # About this project
 > [!NOTE]  
 > The weak gravitational lensing section is currently independant and is not implemented yet to this library.
-> For further infomation, see [this section][#work-underway-on-weak-lensing-data] below. 
+> For further infomation, check [this section](#work-underway-on-weak-lensing-data) below. 
 ## Introduction
 On sub-horizon scales, in the linear regime, and assuming that dark energy does not cluster, the evolution equation for the growth function is given by:
 
