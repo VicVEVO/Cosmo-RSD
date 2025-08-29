@@ -366,7 +366,7 @@ Below are the main observables and their definitions:
   measured between redshift bins $i$ and $j$. They are defined as:
   
   <div align="center">
-    $\xi_\pm^{i,j}(\theta) = \sum_{\ell=2}^{\infty} \frac{2\ell+1}{4\pi} \cdot (C_{\ell}^{\epsilon\epsilon}(i,j) \pm C_{\ell}^{\beta\beta}(i,j)) \cdot d^{\ell}_{2 \pm 2}(\theta) $
+    $\xi^\pm_{i,j}(\theta) = \sum_{\ell=2}^{\infty} \frac{2\ell+1}{4\pi} \cdot (C_{\ell}^{\epsilon\epsilon}(i,j) \pm C_{\ell}^{\beta\beta}(i,j)) \cdot d^{\ell}_{2 \pm 2}(\theta) $
   </div>
   
   where:
@@ -391,8 +391,48 @@ These quantities are then combined in `Chi2Calculator` to compare with observati
 
 # Work underway on Weak Lensing data
 
-[...]
+All the results below can be found in `src/notebooks/WL-DESY3/DESY3.ipynb`. The main concern is that due of lack of time, the code must be optimized to reduce calculation time, and the values are slightly different from what is measured by Dark Energy Survey (DES).
+
+## $\theta$ distribution
+<img src="https://github.com/VicVEVO/Stage-irap/blob/940e9506fff19077dba19579bf3c5ed2d8dfd100/programs/output/figures/other/theta_distrib.png" align="left" width="500em"/>
+
+As mentioned before, we can use the **Flat sky approximation**, which is ascertainable by plotting the $\theta$ angle distribution.
+
+<br clear="left"/>
+
+## $P(k,z)$ approximation
+
+To calculate $C_{\ell}^{\epsilon\epsilon}$, we must determine $P(k,z)$ power spectrum. For that, [Cosmic Linear Anisotropy Solving System](https://class-code.net/) functions were reimplemented in @njit-compatible python functions in `cosmo.py` so that users can change more easily the functions inside `cosmo.py` depending on the model they use. We are using a $\gamma$ free ΛCDM model, so to check that our implementation, we can compare for different $k$ and $z$ our value $P(k,z)$ with the one CLASS gives.
+
+<div align="center">
+  <img src="https://github.com/VicVEVO/Stage-irap/blob/940e9506fff19077dba19579bf3c5ed2d8dfd100/programs/output/figures/other/comparison_P_PCLASS.png" alt="P comparison"/>
+</div>
+
+In the DESY3 and KiDS-1000 database, we have redshifts $z$ below 6 and we can see that the error $\frac{P}{P_{CLASS}}$ remains quite low, but non-negligible. It might be why results are slightly differents for $\xi$ compared to $\xi^{obs}$. The variation is caused by the calculation of $T(k)$ transfer function calculated by CLASS, but I could not find yet any further reason.
+
+## $C_{\ell}^{\epsilon\epsilon}$ approximation
+
+We have:
+
+  - $C_{\ell}^{\epsilon\epsilon}(i,j) = \frac{3\Omega_mH_0^2}{2c^2}^2 \int_0^{\chi_H} (1+z(\chi))^2 q^i(\chi) q^j(\chi) P(\frac{\ell + \frac{1}{2}}{\chi}, z) d\chi$
+  - $q^i(\chi) = \int_{\chi}^{\chi_H} n^i(z(\chi')) \frac{dz}{d\chi'} \frac{\chi'-\chi}{\chi'}$
+
+<div align="center">
+  <img src="https://github.com/VicVEVO/Stage-irap/blob/940e9506fff19077dba19579bf3c5ed2d8dfd100/programs/output/figures/other/ClEE_value.png" alt="ClEE integrand"/>
+</div>
+
+And if we plot integrand we have a legitimate result as when we estimate $\chi_H$ we have `chi_H=13390.37`, and we know that we do not have to integrate further than $\chi_H$, which is verified here.
+
+## $\xi^\pm$ approximation
+
+With our flat-sky approximation, we have: $\xi^+_{i,j}(\theta) = \int_0^{\infty} d\ell \frac{2\ell+1}{4\pi} J_0(\ell\theta)$ (formula not finished as markdown doesn't work with it)
+
+<div align="center">
+  <img src="https://github.com/VicVEVO/Stage-irap/blob/940e9506fff19077dba19579bf3c5ed2d8dfd100/programs/output/figures/other/xi_integrand.png" alt="xi integrand"/>
+</div>
+
+If we plot the integrand, we can see that it is an attenuated function becoming low fastly but we need to integrate it wisely. I did not integrate it wisely: I just used a trapezoid method with a high `N` as I think it is not the main issue. Nonetheless, a smarter method might certainly give better results.
 
 # Acknowledgements
 
-[...]
+I would like to thank everyone from [GAHEC](https://www.irap.omp.eu/research-team/galaxies-astrophysique-hautes-energies-cosmologie-gahec/) team (Galaxies, Astrophysique des Hautes Energies et Cosmologie) from CNRS-irap, especially PhD students, interns and Alain Blanchard who was my supervisor.
