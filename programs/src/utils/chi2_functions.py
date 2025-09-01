@@ -82,6 +82,18 @@ def chi2_bao_dmrd(z_data, dmrd_data, dmrd_err, c, Omega_m_0, rd, H0):
     return np.sum(residuals**2)
 
 def compute_chi2_grid_desy3(Omega_m_0_data, sigma_8_data, Omega_m_0_vals, sigma_8_vals):
+    """Returns chi2 grid for a given likelihood file (Weak Lensing).
+        See how to use in in notebooks/WL-DESY3/DESY3_given.ipynb
+
+    Args:
+        Omega_m_0_data (array)
+        sigma_8_data (array)
+        Omega_m_0_vals (array)
+        sigma_8_vals (array)
+
+    Returns:
+        array: chi2 grid
+    """
     X, Y = np.meshgrid(Omega_m_0_vals, sigma_8_vals)
     positions = np.vstack([X.ravel(), Y.ravel()])
 
